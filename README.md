@@ -1,8 +1,8 @@
-# 📈 Stock Monitor
+# 📈 Stock Watcher
 
 一款基于 **Electron + Vue 3 + TypeScript** 的 A 股桌面盯盘工具，支持悬浮球模式，可常驻桌面实时监控自选股行情与持仓盈亏。
 
-> Designed by **Moon Buffett** 🌙
+> Designed by **Croyell** 🌙
 
 ---
 
@@ -66,7 +66,7 @@
 ## 📁 项目结构
 
 ```
-stock-monitor/
+stock-watcher/
 ├── src/
 │   ├── main/               # Electron 主进程
 │   │   └── index.ts        # 窗口创建、IPC 事件处理

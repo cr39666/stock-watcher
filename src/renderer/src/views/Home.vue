@@ -51,7 +51,7 @@ onUnmounted(() => {
       <div class="text">
         <span class="vue">A-share</span>
         market watcher designed by 
-        <span class="ts">Moon Buffett</span>
+        <span class="ts">Croyell</span>
       </div>
       <p class="tip">Please try clicking <code>the logo above</code> to display your stocks</p>
       <div class="actions">
