@@ -69,7 +69,11 @@ const toggleWindowAlwaysOnTop = () => {
 }
 
 const goBack = () => {
-  router.push('/home')
+  router.push('/main-list')
+}
+
+const goToAbout = () => {
+  router.push('/about')
 }
 
 onMounted(async () => {
@@ -110,9 +114,9 @@ onUnmounted(() => {
   <div ref="containerRef" class="setting-container">
     <DragHandle />
     <div class="setting-header">
-      <span class="back-icon" @click="goBack">🏠</span>
+      <span class="back-icon" title="Back to list" @click="goBack">⬅️</span>
       <span class="title">Settings</span>
-      <span class="placeholder"></span>
+      <span class="about-icon" title="About" @click="goToAbout">ℹ️</span>
     </div>
     <div class="divider"></div>
     <div class="setting-content">
@@ -216,6 +220,16 @@ onUnmounted(() => {
   font-size: 13px;
   font-weight: 500;
   color: #fff;
+}
+
+.about-icon {
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+
+.about-icon:hover {
+  opacity: 0.7;
 }
 
 .placeholder {

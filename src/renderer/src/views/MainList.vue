@@ -453,9 +453,8 @@ const goBack = () => {
   router.push('/')
 }
 
-const goHome = () => {
-  // 跳转后由 Home.vue 的 ResizeObserver 精确调整
-  router.push('/home')
+const goToSetting = () => {
+  router.push('/setting')
 }
 
 onUnmounted(() => {
@@ -572,10 +571,10 @@ onUnmounted(() => {
 
     <div class="summary-section">
       <div class="bottom-actions">
-        <button class="back-btn home-btn" @click="goHome" title="Go to home page">🏠</button>
         <button class="back-btn home-btn" @click="goBack" title="Back to ball">
           <img src="../assets/electron.svg" class="mini-logo" alt="ball" />
         </button>
+        <button class="back-btn home-btn" @click="goToSetting" title="Go to setting page">⚙️</button>
         <div class="input-group">
           <input
             v-model="inputCode"

@@ -61,7 +61,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="containerRef" class="home-container">
+  <div ref="containerRef" class="about-container">
     <DragHandle />
     <div class="main">
       <img alt="logo" class="logo" src="../assets/electron.svg" @click="backToBall" title="Click to shrink to ball" />
@@ -85,7 +85,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.home-container {
+.about-container {
   width: 650px;
   height: 600px;
   display: inline-flex;
