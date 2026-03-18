@@ -45,8 +45,9 @@ const handleKeyDown = (e: KeyboardEvent) => {
 const syncWindowSize = () => {
   if (!containerRef.value) return
   const rect = containerRef.value.getBoundingClientRect()
-  const width = Math.ceil(rect.width) + 40
-  const height = Math.ceil(rect.height) + 40
+  // 增加 32px 的 buffer 用于容纳外阴影（上下左右各 16px）
+  const width = Math.ceil(rect.width) + 32
+  const height = Math.ceil(rect.height) + 32
   window.electron.ipcRenderer.send('resize-window', width, height)
 }
 
@@ -193,8 +194,9 @@ onUnmounted(() => {
   backdrop-filter: blur(10px);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* 使阴影更聚拢以防止截断 */
   padding: 0 12px 12px 12px;
+  margin: 16px; /* 给阴影留出空间 */
   color: #eee;
   display: inline-block;
 }

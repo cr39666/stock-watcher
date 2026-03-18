@@ -149,18 +149,19 @@ app.whenReady().then(() => {
   }
 
   createTray()
-  createWindow()
 
   app.on('browser-window-created', (_, window) => {
     if (!app.isPackaged) {
       window.webContents.on('before-input-event', (event, input) => {
-        if (input.key === 'F12') {
+        if (input.key === 'F12' && input.type === 'keyDown') {
           window.webContents.toggleDevTools()
           event.preventDefault()
         }
       })
     }
   })
+
+  createWindow()
 
   ipcMain.on('resize-window', (event, width: number, height: number) => {
     const browserWindow = BrowserWindow.fromWebContents(event.sender)

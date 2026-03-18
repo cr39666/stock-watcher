@@ -1,23 +1,16 @@
 <script setup lang="ts">
-import Versions from '../components/Versions.vue'
 import DragHandle from '../components/DragHandle.vue'
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
+// @ts-ignore
+import pkg from '../../../../package.json'
+const version = pkg.version
+
 const containerRef = ref<HTMLElement | null>(null)
 let resizeObserver: ResizeObserver | null = null
-
-const goToDetail = () => {
-  // 跳转到详情页
-  router.push('/main-list')
-}
-
-const goToSetting = () => {
-  // 跳转到设置页
-  router.push('/setting')
-}
 
 const backToBall = () => {
   // 返回悬浮球形态
@@ -70,33 +63,28 @@ onUnmounted(() => {
         market watcher designed by 
         <span class="ts">Croyell</span>
       </div>
-      <p class="tip">Please try clicking <code>the logo above</code> to display your stocks</p>
-      <div class="actions">
-        <div class="action">
-          <a href="javascript:void(0)" @click="goToDetail">View</a>
-        </div>
-        <div class="action">
-          <a href="javascript:void(0)" @click="goToSetting">Setting</a>
-        </div>
-      </div>
+      <p class="tip">Click the logo above to show <code>the floating ball</code></p>
     </div>
-    <Versions />
+    <div class="version-container">
+      <span class="app-version">v{{ version }}</span>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .about-container {
-  width: 650px;
-  height: 600px;
-  display: inline-flex;
+  width: 320px;
+  height: 300px;
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
   position: relative;
-  padding: 0 25px 25px 25px; /* Top 0 for DragHandle */
-  background-color: rgba(31, 34, 46, 0.8); /* 半透明暗色背景 */
-  border-radius: 12px;
+  padding: 10px 20px 20px 20px;
+  background-color: rgba(31, 34, 46, 0.85); /* 半透明暗色背景 */
+  border-radius: 16px;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .main {
@@ -107,6 +95,9 @@ onUnmounted(() => {
 }
 
 .logo {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 20px;
   cursor: pointer;
   transform-origin: center;
   scale: 1;
@@ -127,5 +118,27 @@ onUnmounted(() => {
   to {
     transform: rotate(360deg);
   }
+}
+
+.text {
+  font-size: 14px;
+  text-align: center;
+}
+
+.tip {
+  font-size: 12px;
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+
+.version-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: inherit;
+  margin: 0;
+  padding: 0;
 }
 </style>
