@@ -19,6 +19,12 @@ onMounted(() => {
     ball: ballAlwaysOnTop !== null ? JSON.parse(ballAlwaysOnTop) : true,
     window: windowAlwaysOnTop !== null ? JSON.parse(windowAlwaysOnTop) : false
   })
+
+  // 同步快捷键
+  const hotkey = localStorage.getItem('global_hotkey')
+  if (hotkey) {
+    window.electron.ipcRenderer.send('set-global-hotkey', hotkey)
+  }
 })
 
 onUnmounted(() => {

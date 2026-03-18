@@ -465,7 +465,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div ref="containerRef" class="detail-container">
+  <div ref="containerRef" class="main-list-container">
     <DragHandle />
     <div class="table-container">
       <table class="stock-table">
@@ -627,7 +627,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
-.detail-container {
+.main-list-container {
   margin: 20px; /* 留出足够的空间显示阴影 */
   padding: 0 10px 10px 10px; /* Top padding 0 for drag handle */
   color: #fff;

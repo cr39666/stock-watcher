@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory } from 'vue-router'
 import FloatingBall from '../views/FloatingBall.vue'
-import Detail from '../views/Detail.vue'
+import MainList from '../views/MainList.vue'
 import Home from '../views/Home.vue'
 import Setting from '../views/Setting.vue'
 
@@ -11,9 +11,9 @@ const routes = [
     component: FloatingBall
   },
   {
-    path: '/detail',
-    name: 'Detail',
-    component: Detail
+    path: '/main-list',
+    name: 'MainList',
+    component: MainList
   },
   {
     path: '/home',

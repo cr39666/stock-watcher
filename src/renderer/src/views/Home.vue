@@ -11,7 +11,7 @@ let resizeObserver: ResizeObserver | null = null
 
 const goToDetail = () => {
   // 跳转到详情页
-  router.push('/detail')
+  router.push('/main-list')
 }
 
 const goToSetting = () => {

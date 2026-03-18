@@ -60,12 +60,12 @@ const goToDetail = () => {
   if (isDragging.value) return // 如果是拖拽结束，不触发点击
   // 展开时调整窗口大小并跳转
   window.electron.ipcRenderer.send('resize-window', 480, 400)
-  router.push('/detail')
+  router.push('/main-list')
 }
 </script>
 
 <template>
-  <div ref="containerRef" class="floating-ball-container" @mousedown="onMouseDown" @click="goToDetail" title="Drag to move, click to show details">
+  <div ref="containerRef" class="floating-ball-container" @mousedown="onMouseDown" @click="goToDetail" title="Drag to move, click to show list">
     <img src="../assets/electron.svg" class="ball-icon" alt="logo" />
   </div>
 </template>
