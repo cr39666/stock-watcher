@@ -514,15 +514,6 @@ const setPriceAlert = async (stock: StockItem) => {
   }
 }
 
-// 删除价格提醒（预留功能）
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _removePriceAlert = (stock: StockItem, index: number) => {
-  if (stock.priceAlerts) {
-    stock.priceAlerts.splice(index, 1)
-    saveStocks()
-  }
-}
-
 // 检查价格提醒
 const checkPriceAlerts = (stock: StockItem, currentPrice: number) => {
   if (!stock.priceAlerts || stock.priceAlerts.length === 0) return
@@ -565,19 +556,6 @@ const formatPriceAlerts = (stock: StockItem): string => {
       return `${arrow}${a.targetPrice.toFixed(2)}${triggered}`
     })
     .join(' ')
-}
-
-// 重置已触发的价格提醒（用于新交易日）
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _resetTriggeredAlerts = () => {
-  stocks.value.forEach((stock) => {
-    if (stock.priceAlerts) {
-      stock.priceAlerts.forEach((alert) => {
-        alert.triggered = false
-      })
-    }
-  })
-  saveStocks()
 }
 
 onMounted(async () => {
