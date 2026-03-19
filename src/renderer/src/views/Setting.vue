@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import DragHandle from '../components/DragHandle.vue'
 
+const { t, locale } = useI18n()
 const router = useRouter()
 const containerRef = ref<HTMLElement | null>(null)
 let resizeObserver: ResizeObserver | null = null
@@ -100,6 +102,11 @@ const goToAbout = () => {
   router.push('/about')
 }
 
+const changeLanguage = (lang: string) => {
+  locale.value = lang
+  localStorage.setItem('lang', lang)
+}
+
 onMounted(async () => {
   // 加载配置
   const ballSaved = localStorage.getItem('ball_always_on_top')
@@ -138,34 +145,42 @@ onUnmounted(() => {
   <div ref="containerRef" class="setting-container">
     <DragHandle />
     <div class="setting-header">
-      <span class="back-icon" title="Back to list" @click="goBack">⬅️</span>
-      <span class="title">Settings</span>
-      <span class="about-icon" title="About" @click="goToAbout">ℹ️</span>
+      <span class="back-icon" :title="t('backToHome')" @click="goBack">⬅️</span>
+      <span class="title">{{ t('settings') }}</span>
+      <span class="about-icon" :title="t('about')" @click="goToAbout">ℹ️</span>
     </div>
     <div class="divider"></div>
     <div class="setting-content">
       <div class="setting-item">
-        <span class="label">Ball Always on Top</span>
+        <span class="label">{{ t('ballAlwaysOnTop') }}</span>
         <div class="switch" :class="{ active: ballAlwaysOnTop }" @click="toggleBallAlwaysOnTop">
           <div class="handle"></div>
         </div>
       </div>
       <div class="setting-item">
-        <span class="label">Window Always on Top</span>
+        <span class="label">{{ t('windowAlwaysOnTop') }}</span>
         <div class="switch" :class="{ active: windowAlwaysOnTop }" @click="toggleWindowAlwaysOnTop">
           <div class="handle"></div>
         </div>
       </div>
       <div class="setting-item hotkey-item">
-        <span class="label">Display/Hide Window Hotkey</span>
+        <span class="label">{{ t('hotkeyLabel') }}</span>
         <div class="hotkey-display" :class="{ recording: isRecording, empty: !globalHotkey && !isRecording }" @click="startRecording">
-          <span v-if="isRecording">Press keys...</span>
+          <span v-if="isRecording">{{ t('pressKeys') }}</span>
           <span v-else-if="globalHotkey">{{ globalHotkey }}</span>
-          <span v-else class="placeholder">Click to set</span>
+          <span v-else class="placeholder">{{ t('clickToSet') }}</span>
         </div>
       </div>
       <div class="setting-item">
-        <span class="label">Other settings are under development ...</span>
+        <span class="label">{{ t('language') }}</span>
+        <div class="lang-select">
+          <span class="lang-option" :class="{ active: locale === 'en' }" @click="changeLanguage('en')">{{ t('english') }}</span>
+          <span class="lang-divider">|</span>
+          <span class="lang-option" :class="{ active: locale === 'zh' }" @click="changeLanguage('zh')">{{ t('chinese') }}</span>
+        </div>
+      </div>
+      <div class="setting-item">
+        <span class="label">{{ t('otherSettings') }}</span>
       </div>
     </div>
   </div>
@@ -312,5 +327,30 @@ onUnmounted(() => {
 
 .switch.active .handle {
   transform: translateX(14px);
+}
+
+.lang-select {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+}
+
+.lang-option {
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 0.2s;
+}
+
+.lang-option:hover {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.lang-option.active {
+  color: #2ecc71;
+}
+
+.lang-divider {
+  margin: 0 6px;
+  color: rgba(255, 255, 255, 0.3);
 }
 </style>

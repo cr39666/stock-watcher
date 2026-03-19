@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import DragHandle from '../components/DragHandle.vue'
 import Modal from '../components/Modal.vue'
 import Confirm from '../components/Confirm.vue'
 import Toast from '../components/Toast.vue'
 
+const { t } = useI18n()
 const router = useRouter()
 
 // 股票数据模型
@@ -141,7 +143,7 @@ const formatName = (name: string | undefined): string => {
 const copyPrice = (price: number | undefined) => {
   if (!price) return
   navigator.clipboard.writeText(price.toString()).then(() => {
-    toastRef.value?.show('Price Copied!', 'success')
+    toastRef.value?.show(t('priceCopied'), 'success')
   })
 }
 
@@ -186,7 +188,7 @@ const addStock = async () => {
   }
 
   if (stocks.value.some((s) => s.code === code)) {
-    alert('该股票已存在')
+    alert(t('stockExists'))
     return
   }
 
@@ -195,7 +197,7 @@ const addStock = async () => {
   const quote = quotes.value[code]
   const defaultPrice = quote?.currentPrice || 0
 
-  const res = await modalRef.value?.open('add', '添加持仓', `请输入股票 ${code} 的初始仓位`, {
+  const res = await modalRef.value?.open('add', t('addPosition'), `${t('initialCostHint')}: ${code}`, {
     price: defaultPrice,
     amount: 1
   })
@@ -210,7 +212,7 @@ const addStock = async () => {
     saveStocks()
     inputCode.value = ''
     fetchQuotes(true)
-    toastRef.value?.show('Stock Added!', 'success')
+    toastRef.value?.show(t('stockAdded'), 'success')
   }
 }
 
@@ -251,23 +253,23 @@ const handleDeleteAction = async () => {
   if (selectedCodes.value.length > 0) {
     // 批量删除已选项
     const confirmed = await confirmRef.value?.open(
-      '删除股票',
-      `确定要删除选中的 ${selectedCodes.value.length} 只股票吗？`
+      t('deleteStock'),
+      t('deleteConfirm', { count: selectedCodes.value.length })
     )
     if (confirmed) {
       stocks.value = stocks.value.filter((s) => !selectedCodes.value.includes(s.code))
       selectedCodes.value = []
       saveStocks()
-      toastRef.value?.show('Selected Stocks Removed', 'info')
+      toastRef.value?.show(t('selectedRemoved'), 'info')
     }
   } else {
     // 清空所有股票（原逻辑）
     if (stocks.value.length === 0) return
-    const confirmed = await confirmRef.value?.open('清空列表', '确定要清空列表中的所有股票吗？')
+    const confirmed = await confirmRef.value?.open(t('clearList'), t('clearConfirm'))
     if (confirmed) {
       stocks.value = []
       saveStocks()
-      toastRef.value?.show('All Stocks Cleared', 'warn')
+      toastRef.value?.show(t('allCleared'), 'warn')
     }
   }
 }
@@ -279,8 +281,8 @@ const adjustStockFlow = async (stock: StockItem) => {
 
   const res = await modalRef.value?.open(
     'transaction',
-    '调仓确认',
-    `加/减仓: 正数为买入，负数为卖出`,
+    t('adjustPosition'),
+    t('positionHint'),
     { price: currentPrice, amount: 0 }
   )
 
@@ -291,7 +293,7 @@ const adjustStockFlow = async (stock: StockItem) => {
 
     const newAmount = stock.amount + delta
     if (newAmount < 0) {
-      toastRef.value?.show('持仓手数不能小于0', 'fail')
+      toastRef.value?.show(t('amountCannotBeNegative'), 'fail')
       return
     }
 
@@ -305,7 +307,7 @@ const adjustStockFlow = async (stock: StockItem) => {
 
     stock.amount = newAmount
     saveStocks()
-    toastRef.value?.show('Position Updated', 'success')
+    toastRef.value?.show(t('positionUpdated'), 'success')
   }
 }
 
@@ -474,48 +476,44 @@ onUnmounted(() => {
         <thead>
           <tr>
             <th
-              :title="nameDisplayMode === 0 ? '名称 (Name)' : '代码 (Code)'"
+              :title="nameDisplayMode === 0 ? t('name') : t('code')"
               @click="toggleNameDisplayMode"
               class="clickable-th"
             >
               {{ nameDisplayMode === 0 ? 'Name' : 'Code' }} <span class="toggle-icon">🔁</span>
             </th>
-            <th title="当前价 (Current Price)" @click="toggleSort('curPrice')" class="clickable-th">
+            <th :title="t('currentPrice')" @click="toggleSort('curPrice')" class="clickable-th">
               Price
               <span class="sort-icon">{{
                 sortColumn === 'curPrice' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
               }}</span>
             </th>
-            <th title="当日盈亏 (Daily Pnl)" @click="toggleSort('dpnl')" class="clickable-th">
+            <th :title="t('dailyPnl')" @click="toggleSort('dpnl')" class="clickable-th">
               D.PnL
               <span class="sort-icon">{{
                 sortColumn === 'dpnl' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
               }}</span>
             </th>
-            <th title="持仓总盈亏 (Total Pnl)" @click="toggleSort('tpnl')" class="clickable-th">
+            <th :title="t('totalPnl')" @click="toggleSort('tpnl')" class="clickable-th">
               T.PnL
               <span class="sort-icon">{{
                 sortColumn === 'tpnl' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
               }}</span>
             </th>
             <th
-              :title="
-                avgDisplayMode === 0
-                  ? '均摊成本/保本价 (Avg. Buy Price)'
-                  : '持仓市值 (Market Value)'
-              "
+              :title="avgDisplayMode === 0 ? t('avgBuyPrice') : t('marketValue')"
               @click="toggleAvgDisplayMode"
               class="clickable-th"
             >
               {{ avgDisplayMode === 0 ? 'Avg' : 'Val' }} <span class="toggle-icon">🔁</span>
             </th>
-            <th title="涨跌幅 (Change)" @click="toggleSort('change')" class="clickable-th">
+            <th :title="t('change')" @click="toggleSort('change')" class="clickable-th">
               Chg%
               <span class="sort-icon">{{
                 sortColumn === 'change' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
               }}</span>
             </th>
-            <th title="持仓手数 (Amount)">Qty</th>
+            <th :title="t('amount')">Qty</th>
           </tr>
         </thead>
         <tbody>
@@ -537,7 +535,7 @@ onUnmounted(() => {
             <td
               :class="['price-cell', quotes[stock.code]?.changeAmount >= 0 ? 'red' : 'green']"
               @click.stop="copyPrice(quotes[stock.code]?.currentPrice)"
-              title="Click to copy price to clipboard"
+              :title="t('clickToCopy')"
             >
               <div v-if="!isCensored" class="clickable-tag">
                 {{ quotes[stock.code]?.currentPrice?.toFixed(2) || '--' }}
@@ -584,7 +582,7 @@ onUnmounted(() => {
             <td
               @click.stop="adjustStockFlow(stock)"
               class="clickable-cell"
-              title="Click to adjust quantity"
+              :title="t('clickToAdjust')"
             >
               <div v-if="!isCensored" class="clickable-tag">
                 {{ stock.amount }}
@@ -593,7 +591,7 @@ onUnmounted(() => {
             </td>
           </tr>
           <tr v-if="stocks.length === 0">
-            <td colspan="7" class="empty-row">no stocks</td>
+            <td colspan="7" class="empty-row">{{ t('noStocks') }}</td>
           </tr>
         </tbody>
       </table>
@@ -601,29 +599,29 @@ onUnmounted(() => {
 
     <div class="summary-section">
       <div class="bottom-actions">
-        <button class="back-btn home-btn" @click="goBack" title="Back to ball">
+        <button class="back-btn home-btn" @click="goBack" :title="t('backToBall')">
           <img src="../assets/electron.svg" class="mini-logo" alt="ball" />
         </button>
-        <button class="back-btn home-btn" @click="goToSetting" title="Go to setting page">
+        <button class="back-btn home-btn" @click="goToSetting" :title="t('goToSetting')">
           ⚙️
         </button>
         <div class="input-group">
           <input
             v-model="inputCode"
-            placeholder="code"
+            :placeholder="t('code')"
             @keyup.enter="addStock"
             class="stock-input"
           />
           <button class="add-btn" @click="addStock">➕</button>
         </div>
       </div>
-      <div class="summary-pnl" title="Toggle Hide Amount" @click="toggleCensor">
+      <div class="summary-pnl" :title="t('toggleHide')" @click="toggleCensor">
         <span
           :class="[
             'visible-summary',
             totalDailyPnl > 0 ? 'red' : totalDailyPnl < 0 ? 'green' : 'gray'
           ]"
-          title="Daily PnL Total"
+          :title="t('dailyPnlTotal')"
         >
           <span class="pnl-label">D:</span>
           <span v-if="!isCensored"
@@ -636,7 +634,7 @@ onUnmounted(() => {
             'visible-summary',
             totalHoldingPnl > 0 ? 'red' : totalHoldingPnl < 0 ? 'green' : 'gray'
           ]"
-          title="Holding PnL Total"
+          :title="t('holdingPnlTotal')"
         >
           <span class="pnl-label">H:</span>
           <span v-if="!isCensored"
@@ -650,7 +648,7 @@ onUnmounted(() => {
         v-if="stocks.length > 0"
         class="clear-all-btn"
         @click="handleDeleteAction"
-        :title="selectedCodes.length > 0 ? 'Delete Selected' : 'Clear All'"
+        :title="selectedCodes.length > 0 ? t('deleteSelected') : t('clearAll')"
       >
         <span class="clear-all-icon">{{ selectedCodes.length > 0 ? '🗑️' : '🧹' }}</span>
       </button>

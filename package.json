@@ -23,6 +23,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "electron-updater": "^6.8.3",
+    "vue-i18n": "^11.3.0",
     "vue-router": "^4.6.4"
   },
   "devDependencies": {

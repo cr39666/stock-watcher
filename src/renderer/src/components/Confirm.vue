@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const isVisible = ref(false)
 const confirmTitle = ref('')
 const confirmMessage = ref('')
@@ -34,9 +36,9 @@ defineExpose({ open })
     <div v-if="isVisible" class="confirm-overlay" @click.self="handleCancel">
       <div class="confirm-content">
         <div class="confirm-header">
-          <span class="confirm-btn-icon cancel" @click="handleCancel" title="取消">❌</span>
+          <span class="confirm-btn-icon cancel" @click="handleCancel" :title="t('cancel')">❌</span>
           <span class="confirm-title">{{ confirmTitle }}</span>
-          <span class="confirm-btn-icon confirm" @click="handleConfirm" title="确定">✅</span>
+          <span class="confirm-btn-icon confirm" @click="handleConfirm" :title="t('confirm')">✅</span>
         </div>
         <div class="confirm-body">
           <p class="confirm-msg">{{ confirmMessage }}</p>

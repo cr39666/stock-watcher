@@ -2,7 +2,9 @@
 import DragHandle from '../components/DragHandle.vue'
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const router = useRouter()
 
 // @ts-ignore
@@ -27,7 +29,7 @@ const versionInfo = ref('')
 const checkForUpdates = () => {
   if (updateStatus.value === 'checking' || updateStatus.value === 'downloading') return
   updateStatus.value = 'checking'
-  updateMessage.value = 'Checking...'
+  updateMessage.value = t('checking')
   window.electron.ipcRenderer.send('check-for-update')
 }
 
@@ -50,15 +52,15 @@ onMounted(async () => {
   window.electron.ipcRenderer.on('update-available', (_event, info: any) => {
     updateStatus.value = 'available'
     versionInfo.value = info?.version || ''
-    updateMessage.value = 'New version available'
+    updateMessage.value = t('newVersionAvailable')
     window.electron.ipcRenderer.send('download-update')
     updateStatus.value = 'downloading'
-    updateMessage.value = 'Downloading...'
+    updateMessage.value = t('downloading')
   })
 
   window.electron.ipcRenderer.on('update-not-available', () => {
     updateStatus.value = 'idle'
-    updateMessage.value = 'Up to date'
+    updateMessage.value = t('upToDate')
     setTimeout(() => {
       if (updateStatus.value === 'idle') updateMessage.value = ''
     }, 3000)
@@ -66,7 +68,7 @@ onMounted(async () => {
 
   window.electron.ipcRenderer.on('update-error', (_event, err) => {
     updateStatus.value = 'idle'
-    updateMessage.value = typeof err === 'string' ? err : 'Update error'
+    updateMessage.value = typeof err === 'string' ? err : t('updateError')
     setTimeout(() => {
       if (updateStatus.value === 'idle') updateMessage.value = ''
     }, 3000)
@@ -80,7 +82,7 @@ onMounted(async () => {
 
   window.electron.ipcRenderer.on('update-downloaded', () => {
     updateStatus.value = 'ready'
-    updateMessage.value = 'Ready to install'
+    updateMessage.value = t('readyToInstall')
   })
 
   // 等待 Vue DOM 更新完毕后再测量
@@ -121,31 +123,32 @@ onUnmounted(() => {
         class="logo"
         src="../assets/electron.svg"
         @click="backToBall"
-        title="Click to shrink to ball"
+        :title="t('clickToShrink')"
       />
       <div class="text">
-        <span class="vue">A-share</span>
-        market watcher designed by
+        <span class="vue">{{ t('ashare') }}</span>
+        {{ t('watcher') }}
         <span class="ts">Croyell</span>
+        {{ t('designedBy') }}
       </div>
     </div>
     <div class="version-container">
-      <span 
-        class="app-version" 
+      <span
+        class="app-version"
         @click="checkForUpdates"
-        title="Check for updates"
+        :title="t('checkUpdates')"
       >
-        v{{ version }} 
+        v{{ version }}
         <span class="update-icon">↻</span>
       </span>
       <div v-if="updateMessage || updateStatus !== 'idle'" class="update-section">
         <span class="update-msg" v-if="updateMessage">{{ updateMessage }}</span>
-        <button 
-          v-if="updateStatus === 'ready'" 
-          class="install-btn" 
+        <button
+          v-if="updateStatus === 'ready'"
+          class="install-btn"
           @click="installUpdate"
         >
-          Install
+          {{ t('install') }}
         </button>
       </div>
     </div>

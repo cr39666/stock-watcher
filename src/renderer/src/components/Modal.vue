@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
+import { useI18n } from 'vue-i18n'
 
+const { t } = useI18n()
 const isVisible = ref(false)
 const modalType = ref<'transaction' | 'add'>('transaction')
 const modalTitle = ref('')
@@ -76,7 +78,7 @@ defineExpose({ open })
                 ref="priceInput"
                 @keyup.enter="handleConfirm"
               />
-              <label>{{ modalType === 'add' ? '初始成本' : '成交价格' }}</label>
+              <label>{{ modalType === 'add' ? t('initialCost') : t('tradePrice') }}</label>
             </div>
             <div class="modal-input-group">
               <input
@@ -86,7 +88,7 @@ defineExpose({ open })
                 ref="qtyInput"
                 @keyup.enter="handleConfirm"
               />
-              <label>{{ modalType === 'add' ? '手数(1手=100股)' : '变动手数' }}</label>
+              <label>{{ modalType === 'add' ? t('lotsHint') : t('deltaLots') }}</label>
             </div>
 
             <p v-if="modalMessage" class="modal-msg">{{ modalMessage }}</p>
