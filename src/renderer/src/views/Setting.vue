@@ -11,7 +11,7 @@ const ballAlwaysOnTop = ref(true)
 const windowAlwaysOnTop = ref(false)
 
 // 快捷键设置
-const globalHotkey = ref('Alt+Z')
+const globalHotkey = ref('')
 const isRecording = ref(false)
 
 const startRecording = () => {
@@ -22,8 +22,31 @@ const handleKeyDown = (e: KeyboardEvent) => {
   if (!isRecording.value) return
   e.preventDefault()
 
+  // Escape 清除快捷键
+  if (e.key === 'Escape') {
+    globalHotkey.value = ''
+    isRecording.value = false
+    localStorage.setItem('global_hotkey', '')
+    window.electron.ipcRenderer.send('set-global-hotkey', '')
+    return
+  }
+
   // 忽略单独的控制键
   if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return
+
+  // 忽略不适合作为快捷键的按键
+  const ignoredKeys = [
+    'Tab', 'CapsLock', 'NumLock', 'ScrollLock',
+    'Insert', 'Delete', 'Home', 'End', 'PageUp', 'PageDown',
+    'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    'Enter', 'Backspace', 'Space',
+    'ContextMenu', 'Pause', 'PrintScreen'
+  ]
+  if (ignoredKeys.includes(e.key)) return
+
+  // 必须包含至少一个修饰键
+  if (!e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey) return
 
   const modifiers: string[] = []
   if (e.ctrlKey) modifiers.push('Ctrl')
@@ -135,8 +158,10 @@ onUnmounted(() => {
       </div>
       <div class="setting-item hotkey-item">
         <span class="label">Display/Hide Window Hotkey</span>
-        <div class="hotkey-display" :class="{ recording: isRecording }" @click="startRecording">
-          {{ isRecording ? 'Press keys...' : globalHotkey }}
+        <div class="hotkey-display" :class="{ recording: isRecording, empty: !globalHotkey && !isRecording }" @click="startRecording">
+          <span v-if="isRecording">Press keys...</span>
+          <span v-else-if="globalHotkey">{{ globalHotkey }}</span>
+          <span v-else class="placeholder">Click to set</span>
         </div>
       </div>
       <div class="setting-item">
@@ -155,6 +180,7 @@ onUnmounted(() => {
   border: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   min-width: 60px;
+  min-height: 26px;
   text-align: center;
   transition: all 0.2s;
 }
@@ -168,6 +194,10 @@ onUnmounted(() => {
   border-color: #e74c3c;
   color: #e74c3c;
   animation: pulse 1.5s infinite;
+}
+
+.hotkey-display.empty .placeholder {
+  color: rgba(255, 255, 255, 0.4);
 }
 
 @keyframes pulse {
