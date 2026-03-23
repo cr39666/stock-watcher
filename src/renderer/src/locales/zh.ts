@@ -9,6 +9,7 @@ export default {
   pressKeys: '请按键...',
   clickToSet: '点击设置',
   language: '语言',
+  showBallPnl: '悬浮球显示盈亏',
   otherSettings: '其他设置开发中...',
   english: 'English',
   chinese: '中文',

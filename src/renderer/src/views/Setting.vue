@@ -11,6 +11,7 @@ let resizeObserver: ResizeObserver | null = null
 
 const ballAlwaysOnTop = ref(true)
 const windowAlwaysOnTop = ref(false)
+const showBallPnl = ref(true)
 
 // 快捷键设置
 const globalHotkey = ref('')
@@ -94,6 +95,11 @@ const toggleWindowAlwaysOnTop = () => {
   })
 }
 
+const toggleShowBallPnl = () => {
+  showBallPnl.value = !showBallPnl.value
+  localStorage.setItem('show_ball_pnl', JSON.stringify(showBallPnl.value))
+}
+
 const goBack = () => {
   router.push('/')
 }
@@ -116,6 +122,10 @@ onMounted(async () => {
   const windowSaved = localStorage.getItem('window_always_on_top')
   if (windowSaved !== null) {
     windowAlwaysOnTop.value = JSON.parse(windowSaved)
+  }
+  const pnlSaved = localStorage.getItem('show_ball_pnl')
+  if (pnlSaved !== null) {
+    showBallPnl.value = JSON.parse(pnlSaved)
   }
   const hotkeySaved = localStorage.getItem('global_hotkey')
   if (hotkeySaved !== null) {
@@ -160,6 +170,12 @@ onUnmounted(() => {
       <div class="setting-item">
         <span class="label">{{ t('windowAlwaysOnTop') }}</span>
         <div class="switch" :class="{ active: windowAlwaysOnTop }" @click="toggleWindowAlwaysOnTop">
+          <div class="handle"></div>
+        </div>
+      </div>
+      <div class="setting-item">
+        <span class="label">{{ t('showBallPnl') }}</span>
+        <div class="switch" :class="{ active: showBallPnl }" @click="toggleShowBallPnl">
           <div class="handle"></div>
         </div>
       </div>

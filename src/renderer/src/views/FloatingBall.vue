@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
@@ -8,6 +8,73 @@ const router = useRouter()
 const isDragging = ref(false)
 let offsetX = 0
 let offsetY = 0
+
+// ---------- 盈亏数据 ----------
+interface StockItem {
+  code: string
+  cost: number
+  amount: number
+  dailyRealizedPnl?: number
+  dailyDate?: string
+}
+interface StockQuote {
+  currentPrice: number
+  yesterdayClose: number
+}
+
+const totalDailyPnl = ref(0)
+const hasStocks = ref(false)
+const showBallPnl = ref(true)
+let pnlTimer: ReturnType<typeof setInterval> | null = null
+
+const getTodayStr = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+const refreshPnl = () => {
+  try {
+    // 同步读取开关设置
+    const pnlSetting = localStorage.getItem('show_ball_pnl')
+    showBallPnl.value = pnlSetting === null ? true : JSON.parse(pnlSetting)
+
+    const stocksRaw = localStorage.getItem('my_stocks')
+    const quotesRaw = localStorage.getItem('cached_quotes')
+    if (!stocksRaw || !quotesRaw) {
+      totalDailyPnl.value = 0
+      hasStocks.value = false
+      return
+    }
+    const stocks: StockItem[] = JSON.parse(stocksRaw)
+    hasStocks.value = stocks.length > 0
+    if (!hasStocks.value) { totalDailyPnl.value = 0; return }
+    const quotes: Record<string, StockQuote> = JSON.parse(quotesRaw)
+    const today = getTodayStr()
+    totalDailyPnl.value = stocks.reduce((sum, s) => {
+      const q = quotes[s.code]
+      if (!q) return sum
+      const dailyCorrection = (s.dailyDate === today ? s.dailyRealizedPnl : 0) || 0
+      return sum + (q.currentPrice - q.yesterdayClose) * s.amount * 100 + dailyCorrection
+    }, 0)
+  } catch {
+    totalDailyPnl.value = 0
+    hasStocks.value = false
+  }
+}
+
+const pnlText = computed(() => {
+  const v = totalDailyPnl.value
+  if (v === 0) return '0'
+  const abs = Math.abs(v)
+  if (abs >= 10000) return `${(abs / 10000).toFixed(1)}万`
+  return abs.toFixed(0)
+})
+
+const pnlColorClass = computed(() => {
+  if (totalDailyPnl.value > 0) return 'pnl-red'
+  if (totalDailyPnl.value < 0) return 'pnl-blue'
+  return 'pnl-gray'
+})
 
 // 用 rAF 节流，只在每帧提交一次 IPC，避免 mousemove 洪泛导致延迟
 let rafId: number | null = null
@@ -56,6 +123,12 @@ const onMouseDown = (e: MouseEvent) => {
 onMounted(() => {
   // 初始收缩为 80x80
   window.electron.ipcRenderer.send('resize-window', 80, 80)
+  refreshPnl()
+  pnlTimer = setInterval(refreshPnl, 3000)
+})
+
+onUnmounted(() => {
+  if (pnlTimer) clearInterval(pnlTimer)
 })
 
 const goToDetail = () => {
@@ -74,6 +147,7 @@ const goToDetail = () => {
     :title="t('dragToMove')"
   >
     <img src="../assets/electron.svg" class="ball-icon" alt="logo" />
+    <span v-if="hasStocks && showBallPnl" class="pnl-text" :class="pnlColorClass">{{ pnlText }}</span>
   </div>
 </template>
 
@@ -86,6 +160,7 @@ const goToDetail = () => {
   justify-content: center;
   cursor: grab;
   user-select: none;
+  position: relative;
 }
 
 .floating-ball-container:active {
@@ -95,7 +170,7 @@ const goToDetail = () => {
 .ball-icon {
   width: 48px;
   height: 48px;
-  opacity: 0.7;
+  opacity: 0.5;
   filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.5));
   pointer-events: none; /* 让事件穿透到容器 */
   animation: ball-rotate 6s linear infinite;
@@ -110,6 +185,36 @@ const goToDetail = () => {
   opacity: 1;
   animation-duration: 2s;
   filter: drop-shadow(0 0 8px #6988e6aa);
+}
+
+/* === 盈亏金额 === */
+.pnl-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  pointer-events: none;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.85), 0 0 8px rgba(0, 0, 0, 0.6);
+  z-index: 1;
+  transition: opacity 0.35s ease;
+}
+
+.floating-ball-container:hover .pnl-text {
+  opacity: 0.4;
+}
+
+.pnl-red {
+  color: var(--ev-c-pink);
+}
+.pnl-blue {
+  color: var(--ev-c-blue);
+}
+.pnl-gray {
+  color: var(--ev-c-text-3);
 }
 
 @keyframes ball-rotate {

@@ -9,6 +9,7 @@ export default {
   pressKeys: 'Press keys...',
   clickToSet: 'Click to set',
   language: 'Language',
+  showBallPnl: 'Ball Show Daily PnL',
   otherSettings: 'Other settings are under development ...',
   english: 'English',
   chinese: '中文',
