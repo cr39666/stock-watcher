@@ -3,6 +3,7 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import DragHandle from '../components/DragHandle.vue'
+import ToggleSwitch from '../components/ToggleSwitch.vue'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -163,21 +164,15 @@ onUnmounted(() => {
     <div class="setting-content">
       <div class="setting-item">
         <span class="label">{{ t('ballAlwaysOnTop') }}</span>
-        <div class="switch" :class="{ active: ballAlwaysOnTop }" @click="toggleBallAlwaysOnTop">
-          <div class="handle"></div>
-        </div>
+        <ToggleSwitch :active="ballAlwaysOnTop" @toggle="toggleBallAlwaysOnTop" />
       </div>
       <div class="setting-item">
         <span class="label">{{ t('windowAlwaysOnTop') }}</span>
-        <div class="switch" :class="{ active: windowAlwaysOnTop }" @click="toggleWindowAlwaysOnTop">
-          <div class="handle"></div>
-        </div>
+        <ToggleSwitch :active="windowAlwaysOnTop" @toggle="toggleWindowAlwaysOnTop" />
       </div>
       <div class="setting-item">
         <span class="label">{{ t('showBallPnl') }}</span>
-        <div class="switch" :class="{ active: showBallPnl }" @click="toggleShowBallPnl">
-          <div class="handle"></div>
-        </div>
+        <ToggleSwitch :active="showBallPnl" @toggle="toggleShowBallPnl" />
       </div>
       <div class="setting-item hotkey-item">
         <span class="label">{{ t('hotkeyLabel') }}</span>
@@ -316,35 +311,6 @@ onUnmounted(() => {
 .label {
   font-size: 12px;
   color: #ccc;
-}
-
-.switch {
-  width: 32px;
-  height: 18px;
-  background: #444;
-  border-radius: 9px;
-  position: relative;
-  cursor: pointer;
-  transition: background 0.3s;
-}
-
-.switch.active {
-  background: #2ecc71;
-}
-
-.handle {
-  width: 14px;
-  height: 14px;
-  background: #fff;
-  border-radius: 50%;
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  transition: transform 0.3s;
-}
-
-.switch.active .handle {
-  transform: translateX(14px);
 }
 
 .lang-select {
