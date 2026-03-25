@@ -96,5 +96,5 @@ export default {
   clearConfirm: '确定要清空列表中的所有股票吗？',
 
   // FloatingBall.vue
-  dragToMove: '拖拽移动，点击展开列表'
+  dragToMove: '拖拽移动，左击展开，右击隐藏',
 }

@@ -19,6 +19,13 @@ const trayTexts: Record<string, { openMonitor: string; openBall: string; quit: s
   zh: { openMonitor: '打开面板', openBall: '打开悬浮球', quit: '退出程序', tooltip: 'AssetPulse' }
 }
 
+// 悬浮球右键菜单多语言文本
+const ballMenuTexts: Record<string, { hideBall: string }> = {
+  default: { hideBall: 'Hide Ball' },
+  en: { hideBall: 'Hide Ball' },
+  zh: { hideBall: '隐藏悬浮球' }
+}
+
 function applyAlwaysOnTop(w: number, h: number): void {
   if (mainWindow) {
     if (w <= 100 && h <= 100) {
@@ -215,6 +222,22 @@ app.whenReady().then(() => {
   ipcMain.on('set-language', (_event, lang: string) => {
     currentLang = lang
     createTray()
+  })
+
+  ipcMain.on('show-ball-context-menu', (event) => {
+    const texts = ballMenuTexts[currentLang] || ballMenuTexts['default']
+    const menu = Menu.buildFromTemplate([
+      {
+        label: texts.hideBall,
+        click: () => {
+          mainWindow?.hide()
+        }
+      }
+    ])
+    const browserWindow = BrowserWindow.fromWebContents(event.sender)
+    if (browserWindow) {
+      menu.popup({ window: browserWindow })
+    }
   })
 
   ipcMain.on('window-move', (event, { screenX, screenY, offsetX, offsetY }) => {

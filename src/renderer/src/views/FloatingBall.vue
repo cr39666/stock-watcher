@@ -190,6 +190,11 @@ const goToDetail = () => {
   // 点击后切换路由到列表页，然后在主进程通知放大窗口
   router.push('/')
 }
+
+const onContextMenu = (e: MouseEvent) => {
+  e.preventDefault()
+  window.electron.ipcRenderer.send('show-ball-context-menu')
+}
 </script>
 
 <template>
@@ -198,6 +203,7 @@ const goToDetail = () => {
     class="floating-ball-container"
     @mousedown="onMouseDown"
     @click="goToDetail"
+    @contextmenu="onContextMenu"
     :title="t('dragToMove')"
   >
     <img src="../assets/electron.svg" class="ball-icon" alt="logo" />
