@@ -126,8 +126,8 @@ onUnmounted(() => {
         :title="t('clickToShrink')"
       />
       <div class="text">
-        <span class="vue">{{ t('ashare') }}</span>
-        {{ t('watcher') }}
+        <span class="vue">{{ t('investment') }}</span>
+        {{ t('monitor') }}
         <span class="ts">Croyell</span>
         {{ t('designedBy') }}
       </div>

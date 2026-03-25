@@ -13,10 +13,10 @@ let windowAlwaysOnTop = false
 let currentLang: string = 'default'
 
 // 托盘菜单多语言文本
-const trayTexts: Record<string, { openWatcher: string; openBall: string; quit: string; tooltip: string }> = {
-  default: { openWatcher: 'Open Watcher', openBall: 'Open Ball', quit: 'Quit', tooltip: 'Stock Watcher' },
-  en: { openWatcher: 'Open Watcher', openBall: 'Open Ball', quit: 'Quit ', tooltip: 'Stock Watcher' },
-  zh: { openWatcher: '打开面板', openBall: '打开悬浮球', quit: '退出程序', tooltip: '股票监控' }
+const trayTexts: Record<string, { openMonitor: string; openBall: string; quit: string; tooltip: string }> = {
+  default: { openMonitor: 'Open Monitor', openBall: 'Open Ball', quit: 'Quit', tooltip: 'AssetPulse' },
+  en: { openMonitor: 'Open Monitor', openBall: 'Open Ball', quit: 'Quit ', tooltip: 'AssetPulse' },
+  zh: { openMonitor: '打开面板', openBall: '打开悬浮球', quit: '退出程序', tooltip: 'AssetPulse' }
 }
 
 function applyAlwaysOnTop(w: number, h: number): void {
@@ -127,7 +127,7 @@ function createTray(): void {
 
   const contextMenu = Menu.buildFromTemplate([
     {
-      label: texts.openWatcher,
+      label: texts.openMonitor,
       click: () => {
         mainWindow?.webContents.send('navigate', '/')
         mainWindow?.setSkipTaskbar(false)

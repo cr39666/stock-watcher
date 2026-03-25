@@ -15,8 +15,8 @@ export default {
   default: '默认',
 
   // About.vue
-  ashare: 'A股',
-  watcher: '行情监控器，由',
+  investment: 'A股&黄金&基金',
+  monitor: '投资监控器，由',
   designedBy: '原创设计',
   clickToShrink: '点击切换至悬浮球',
   checkUpdates: '检查更新',
@@ -66,7 +66,7 @@ export default {
   priceAlertSet: '价格提醒已设置!',
   priceAlertUpCleared: '涨价提醒已取消',
   priceAlertDownCleared: '跌价提醒已取消',
-  priceAlertTitle: '股票价格提醒',
+  priceAlertTitle: '价格提醒',
   targetPrice: '目标价格',
   alertUp: '涨到',
   alertDown: '跌到',

@@ -1,5 +1,5 @@
 appId: com.electron.app
-productName: StockWatcher
+productName: AssetPulse
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: StockWatcher
+  executableName: AssetPulse
 nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
@@ -44,6 +44,6 @@ npmRebuild: false
 publish:
   provider: github
   owner: cr39666
-  repo: stock-watcher
+  repo: investment-monitor
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

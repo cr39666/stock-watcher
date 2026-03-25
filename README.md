@@ -1,4 +1,4 @@
-# 📈 Stock Watcher
+# 📈 AssetPulse
 
 一款基于 **Electron + Vue 3 + TypeScript** 的 A 股桌面盯盘工具，支持悬浮球模式，可常驻桌面实时监控自选股行情与持仓盈亏。
 
@@ -94,7 +94,7 @@
 ## 📁 主要项目结构
 
 ```
-stock-watcher/
+investment-monitor/
 ├── src/
 │   ├── main/               # Electron 主进程 (窗口、路由、IPC、快捷键管理)
 │   ├── preload/            # 预加载脚本

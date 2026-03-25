@@ -15,8 +15,8 @@ export default {
   default: 'Default',
 
   // About.vue
-  ashare: 'A-share',
-  watcher: 'market watcher designed by',
+  investment: 'A-shares & Gold & Funds',
+  monitor: 'investment monitor — designed by',
   designedBy: '',
   clickToShrink: 'Click to shrink to ball',
   checkUpdates: 'Check for updates',
@@ -66,7 +66,7 @@ export default {
   priceAlertSet: 'Price Alert Set!',
   priceAlertUpCleared: 'Rise Alert Cleared',
   priceAlertDownCleared: 'Fall Alert Cleared',
-  priceAlertTitle: 'Stock Price Alert',
+  priceAlertTitle: 'Price Alert',
   targetPrice: 'Target Price',
   alertUp: 'Rise to',
   alertDown: 'Fall to',

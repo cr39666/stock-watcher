@@ -1,5 +1,5 @@
 export default {
-  // Setting.vue - 中英混合风格
+  // Setting.vue
   settings: 'Settings',
   backToList: 'Back to list',
   about: 'About',
@@ -15,10 +15,10 @@ export default {
   default: 'Default',
 
   // About.vue
-  ashare: 'A-share',
-  watcher: 'market watcher designed by',
+  investment: 'A-shares & Gold & Funds',
+  monitor: 'investment monitor — designed by',
   designedBy: '',
-  clickToShrink: 'click to shrink to ball',
+  clickToShrink: 'Click to shrink to ball',
   checkUpdates: 'Check for updates',
   checking: 'Checking...',
   newVersionAvailable: 'New version available',
@@ -28,7 +28,7 @@ export default {
   readyToInstall: 'Ready to install',
   install: 'Install',
 
-  // MainList.vue - 中英混合风格
+  // MainList.vue
   name: '名称 Name',
   code: 'Code',
   currentPrice: '当前价 Price',
