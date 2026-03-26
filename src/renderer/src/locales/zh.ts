@@ -27,6 +27,8 @@ export default {
   updateError: '更新失败',
   readyToInstall: '准备安装',
   install: '安装',
+  viewReleaseNotes: '查看更新内容',
+  whatsNew: '更新内容',
 
   // MainList.vue
   name: '名称',

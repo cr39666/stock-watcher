@@ -30,6 +30,8 @@ const updateStatus = ref<'idle' | 'checking' | 'available' | 'downloading' | 're
 const updateMessage = ref('')
 const downloadProgress = ref(0)
 const versionInfo = ref('')
+const releaseNotes = ref('')
+const showReleaseNotes = ref(false)
 
 const checkForUpdates = () => {
   if (updateStatus.value === 'checking' || updateStatus.value === 'downloading') return
@@ -40,6 +42,26 @@ const checkForUpdates = () => {
 
 const installUpdate = () => {
   window.electron.ipcRenderer.send('quit-and-install')
+}
+
+// 格式化 release notes（简单的 Markdown 转 HTML）
+const formatReleaseNotes = (notes: string): string => {
+  if (!notes) return ''
+  return notes
+    .split('\n')
+    .map(line => {
+      // 标题
+      if (line.startsWith('### ')) return `<h4>${line.slice(4)}</h4>`
+      if (line.startsWith('## ')) return `<h3>${line.slice(3)}</h3>`
+      if (line.startsWith('# ')) return `<h2>${line.slice(2)}</h2>`
+      // 列表项
+      if (line.startsWith('- ') || line.startsWith('* ')) return `<li>${line.slice(2)}</li>`
+      // 空行
+      if (!line.trim()) return '<br>'
+      // 普通段落
+      return `<p>${line}</p>`
+    })
+    .join('')
 }
 
 // 通用窗口尺寸同步：测量容器实际尺寸并通知主进程
@@ -58,6 +80,14 @@ onMounted(async () => {
     updateStatus.value = 'available'
     versionInfo.value = info?.version || ''
     updateMessage.value = t('newVersionAvailable')
+    // 提取 release notes
+    if (info?.releaseNotes) {
+      if (typeof info.releaseNotes === 'string') {
+        releaseNotes.value = info.releaseNotes
+      } else if (Array.isArray(info.releaseNotes)) {
+        releaseNotes.value = info.releaseNotes.map((n: any) => n.note).join('\n')
+      }
+    }
     window.electron.ipcRenderer.send('download-update')
     updateStatus.value = 'downloading'
     updateMessage.value = t('downloading')
@@ -85,9 +115,17 @@ onMounted(async () => {
     updateMessage.value = `Downloading... ${downloadProgress.value}%`
   })
 
-  window.electron.ipcRenderer.on('update-downloaded', () => {
+  window.electron.ipcRenderer.on('update-downloaded', (_event, info: any) => {
     updateStatus.value = 'ready'
     updateMessage.value = t('readyToInstall')
+    // 提取 release notes（如果 update-available 中没有）
+    if (!releaseNotes.value && info?.releaseNotes) {
+      if (typeof info.releaseNotes === 'string') {
+        releaseNotes.value = info.releaseNotes
+      } else if (Array.isArray(info.releaseNotes)) {
+        releaseNotes.value = info.releaseNotes.map((n: any) => n.note).join('\n')
+      }
+    }
   })
 
   // 等待 Vue DOM 更新完毕后再测量
@@ -154,6 +192,15 @@ onUnmounted(() => {
       </span>
       <div v-if="updateMessage || updateStatus !== 'idle'" class="update-section">
         <span class="update-msg" v-if="updateMessage">{{ updateMessage }}</span>
+        <span v-if="versionInfo" class="version-badge">v{{ versionInfo }}</span>
+        <button
+          v-if="releaseNotes && updateStatus === 'ready'"
+          class="notes-btn"
+          @click="showReleaseNotes = true"
+          :title="t('viewReleaseNotes')"
+        >
+          📋
+        </button>
         <button
           v-if="updateStatus === 'ready'"
           class="install-btn"
@@ -161,6 +208,16 @@ onUnmounted(() => {
         >
           {{ t('install') }}
         </button>
+      </div>
+      <!-- Release Notes 弹窗 -->
+      <div v-if="showReleaseNotes" class="release-notes-overlay" @click.self="showReleaseNotes = false">
+        <div class="release-notes-modal">
+          <div class="release-notes-header">
+            <span>{{ t('whatsNew') }} v{{ versionInfo }}</span>
+            <span class="close-btn" @click="showReleaseNotes = false">✕</span>
+          </div>
+          <div class="release-notes-content" v-html="formatReleaseNotes(releaseNotes)"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -319,5 +376,127 @@ onUnmounted(() => {
 
 .install-btn:hover {
   background: rgba(46, 204, 113, 0.4);
+}
+
+.notes-btn {
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all 0.2s;
+}
+
+.notes-btn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.version-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 8px;
+  background: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+/* Release Notes 弹窗样式 */
+.release-notes-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.release-notes-modal {
+  background: #1a1c26;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  width: 280px;
+  max-height: 200px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  animation: modalSlideUp 0.3s ease-out;
+}
+
+.release-notes-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 12px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.close-btn {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  font-size: 14px;
+}
+
+.close-btn:hover {
+  opacity: 1;
+}
+
+.release-notes-content {
+  padding: 12px 14px;
+  overflow-y: auto;
+  font-size: 11px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.release-notes-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.release-notes-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
+}
+
+.release-notes-content h2,
+.release-notes-content h3,
+.release-notes-content h4 {
+  margin: 8px 0 4px;
+  color: #2ecc71;
+}
+
+.release-notes-content h2 { font-size: 14px; }
+.release-notes-content h3 { font-size: 13px; }
+.release-notes-content h4 { font-size: 12px; }
+
+.release-notes-content p {
+  margin: 4px 0;
+}
+
+.release-notes-content li {
+  margin: 2px 0 2px 12px;
+  list-style-type: disc;
+}
+
+@keyframes modalSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>

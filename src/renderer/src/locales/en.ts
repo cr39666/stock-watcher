@@ -27,6 +27,8 @@ export default {
   updateError: 'Update error',
   readyToInstall: 'Ready to install',
   install: 'Install',
+  viewReleaseNotes: 'View Release Notes',
+  whatsNew: "What's New",
 
   // MainList.vue
   name: 'Name',
