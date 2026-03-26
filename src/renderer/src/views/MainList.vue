@@ -15,6 +15,7 @@ interface StockItem {
   code: string // 比如 sh600519
   cost: number // 成本价
   amount: number // 持仓手数 (1手=100股)
+  buyDate?: string // 买入日期 (YYYY-MM-DD)
   isNew?: boolean // 是否为新添加（用于初始化默认成本）
   priceAlerts?: PriceAlert[] // 价格提醒列表
   realizedPnl?: number // 已实现盈亏（减仓/清仓时累计，永久）
@@ -294,16 +295,18 @@ const addStock = async () => {
   const quote = quotes.value[code]
   const defaultPrice = quote?.currentPrice || 0
 
-  const res = await modalRef.value?.open('add', t('addPosition'), `${t('initialCostHint')}: ${code}`, {
+  const res = await modalRef.value?.open('add', t('addPosition'), '', {
     price: defaultPrice,
     amount: 1
   })
 
   if (res?.confirmed) {
+    const today = getTodayStr()
     stocks.value.push({
       code,
       cost: res.price,
       amount: res.amount,
+      buyDate: res.isTodayNewPosition ? today : undefined,
       isNew: false
     })
     saveStocks()
@@ -536,11 +539,21 @@ const syncWindowSize = () => {
   window.electron.ipcRenderer.send('resize-window', width, height)
 }
 
-// 计算某只股票的当日盈亏 = (现价 - 昨收) * 当前股数 + 当日已实现盈亏修正
+// 计算某只股票的当日盈亏
+// 如果今天买入：(现价 - 买入价) × 股数
+// 如果之前买入：(现价 - 昨收) × 股数 + 当日已实现盈亏修正
 const calculateDailyPnl = (stock: StockItem): number => {
   const quote = quotes.value[stock.code]
   if (!quote) return 0
+
   const today = getTodayStr()
+
+  // 如果今天买入，当日盈亏 = (现价 - 买入价) × 股数
+  if (stock.buyDate === today) {
+    return (quote.currentPrice - stock.cost) * stock.amount * 100
+  }
+
+  // 如果之前买入，当日盈亏 = (现价 - 昨收) × 股数 + 当日已实现盈亏修正
   const dailyCorrection = (stock.dailyDate === today ? stock.dailyRealizedPnl : 0) || 0
   return (quote.currentPrice - quote.yesterdayClose) * stock.amount * 100 + dailyCorrection
 }

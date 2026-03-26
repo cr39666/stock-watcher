@@ -14,6 +14,7 @@ interface StockItem {
   code: string
   cost: number
   amount: number
+  buyDate?: string
   dailyRealizedPnl?: number
   dailyDate?: string
 }
@@ -122,6 +123,13 @@ const calcPnl = (stocks: StockItem[], quotes: Record<string, StockQuote>) => {
   totalDailyPnl.value = stocks.reduce((sum, s) => {
     const q = quotes[s.code]
     if (!q) return sum
+
+    // 如果今天买入，当日盈亏 = (现价 - 买入价) × 股数
+    if (s.buyDate === today) {
+      return sum + (q.currentPrice - s.cost) * s.amount * 100
+    }
+
+    // 如果之前买入，当日盈亏 = (现价 - 昨收) × 股数 + 当日已实现盈亏修正
     const dailyCorrection = (s.dailyDate === today ? s.dailyRealizedPnl : 0) || 0
     return sum + (q.currentPrice - q.yesterdayClose) * s.amount * 100 + dailyCorrection
   }, 0)

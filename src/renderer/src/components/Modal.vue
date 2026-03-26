@@ -11,6 +11,7 @@ const tradePrice = ref(0)
 const amount = ref(0)
 const currentAmount = ref(0) // 当前持仓手数（调仓模式下使用）
 const alertDirection = ref<'up' | 'down'>('up')
+const isTodayNewPosition = ref(false) // 是否当日新建仓
 let resolvePromise: ((value: any) => void) | null = null
 
 const priceInput = ref<HTMLInputElement | null>(null)
@@ -50,6 +51,7 @@ const open = (
   currentAmount.value = defaults.currentAmount || 0
   alertDirection.value = defaults.direction || 'up'
   isPriceUp.value = defaults.isUp ?? null
+  isTodayNewPosition.value = false // 默认不是当日新建仓
   isVisible.value = true
 
   nextTick(() => {
@@ -76,7 +78,8 @@ const handleConfirm = () => {
     confirmed: true,
     price: tradePrice.value,
     amount: amount.value,
-    direction: alertDirection.value
+    direction: alertDirection.value,
+    isTodayNewPosition: isTodayNewPosition.value
   })
 }
 
@@ -180,6 +183,14 @@ defineExpose({ open })
                   @click="handleClearPosition"
                   :title="t('clearPosition')"
                 >🧹</button>
+              </div>
+              <!-- 当日新建仓选项 -->
+              <div v-if="modalType === 'add'" class="modal-checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" v-model="isTodayNewPosition" class="checkbox-input" />
+                  <span class="checkbox-custom"></span>
+                  <span class="checkbox-text">{{ t('isTodayNewPosition') }}</span>
+                </label>
               </div>
             </template>
 
@@ -370,6 +381,61 @@ defineExpose({ open })
 .clear-position-btn:hover {
   background-color: rgba(231, 76, 60, 0.3);
   border-color: #e74c3c;
+}
+
+/* 复选框样式 */
+.modal-checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 11px;
+  color: #aaa;
+  user-select: none;
+}
+
+.checkbox-input {
+  display: none;
+}
+
+.checkbox-custom {
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  margin-right: 6px;
+  position: relative;
+  transition: all 0.2s;
+  background: transparent;
+}
+
+.checkbox-input:checked + .checkbox-custom {
+  background: #2ecc71;
+  border-color: #2ecc71;
+}
+
+.checkbox-input:checked + .checkbox-custom::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.checkbox-text {
+  transition: color 0.2s;
+}
+
+.checkbox-label:hover .checkbox-text {
+  color: #fff;
 }
 
 /* 当前持仓手数高亮 */

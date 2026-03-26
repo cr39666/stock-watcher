@@ -58,7 +58,6 @@ export default {
   priceCopied: 'Price Copied!',
   dailyPnlCopied: 'Daily PnL Copied!',
   totalPnlCopied: 'Total PnL Copied!',
-  initialCostHint: 'Initial position for',
 
   // Price Alert
   priceAlert: 'Price Alert',
@@ -86,6 +85,7 @@ export default {
   clearPosition: 'Sell All',
   clearPositionTitle: 'Sell All Confirmation',
   clearPositionConfirm: 'Sell all {amount} lot(s) of {name} at {price}?',
+  isTodayNewPosition: 'Today\'s New Position',
 
   // Confirm.vue
   confirm: 'Confirm',
