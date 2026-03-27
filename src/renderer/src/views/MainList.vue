@@ -384,11 +384,21 @@ const adjustStockFlow = async (stock: StockItem) => {
     const res = await modalRef.value?.open(
       'transaction',
       t('adjustPosition'),
-      t('positionHint'),
+      quote?.name || stock.code,
       { price: lastPrice, amount: 0, currentAmount: stock.amount }
     )
 
     if (!res?.confirmed) return
+
+    // 买入/卖出：需要二次确认
+    if (!res.clearPosition) {
+      lastPrice = res.price
+      const stockName = quote?.name || stock.code
+      const directionText = res.amount > 0 ? t('tradeBuy') : t('tradeSell')
+      const confirmMsg = `${directionText} ${stockName}，${t('tradePrice')} ${res.price.toFixed(2)}，${t('deltaLots')} ${Math.abs(res.amount)}？`
+      const confirmed = await confirmRef.value?.open(t('adjustPosition'), confirmMsg)
+      if (!confirmed) continue
+    }
 
     // 清仓：需要二次确认
     if (res.clearPosition) {

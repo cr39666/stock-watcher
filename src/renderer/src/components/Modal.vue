@@ -11,7 +11,10 @@ const tradePrice = ref(0)
 const amount = ref(0)
 const currentAmount = ref(0) // 当前持仓手数（调仓模式下使用）
 const alertDirection = ref<'up' | 'down'>('up')
+const tradeDirection = ref<'buy' | 'sell' | 'clear'>('buy')
 const isTodayNewPosition = ref(false) // 是否当日新建仓
+const shakeHint = ref('') // 临时提示
+let shakeTimer: ReturnType<typeof setTimeout> | null = null
 let resolvePromise: ((value: any) => void) | null = null
 
 const priceInput = ref<HTMLInputElement | null>(null)
@@ -51,6 +54,7 @@ const open = (
   currentAmount.value = defaults.currentAmount || 0
   alertDirection.value = defaults.direction || 'up'
   isPriceUp.value = defaults.isUp ?? null
+  tradeDirection.value = 'buy' // 默认买入
   isTodayNewPosition.value = false // 默认不是当日新建仓
   isVisible.value = true
 
@@ -68,16 +72,42 @@ const open = (
   })
 }
 
+const showHint = (msg: string) => {
+  shakeHint.value = msg
+  if (shakeTimer) clearTimeout(shakeTimer)
+  shakeTimer = setTimeout(() => { shakeHint.value = '' }, 1500)
+}
+
 const handleConfirm = () => {
   // 添加股票时，验证手数必须大于0
   if (modalType.value === 'add' && amount.value <= 0) {
+    showHint(t('amountCannotBeNegative'))
+    return
+  }
+  // 调仓时，变动手数不能为0（清仓除外）
+  if (modalType.value === 'transaction' && tradeDirection.value !== 'clear' && amount.value === 0) {
+    showHint(t('tradeAmountZero'))
     return
   }
   isVisible.value = false
+  // 清仓模式
+  if (modalType.value === 'transaction' && tradeDirection.value === 'clear') {
+    resolvePromise?.({
+      confirmed: true,
+      clearPosition: true,
+      price: tradePrice.value,
+      amount: -currentAmount.value
+    })
+    return
+  }
+  // 调仓模式：根据买入/卖出方向自动添加正负号
+  const finalAmount = modalType.value === 'transaction'
+    ? (tradeDirection.value === 'buy' ? Math.abs(amount.value) : -Math.abs(amount.value))
+    : amount.value
   resolvePromise?.({
     confirmed: true,
     price: tradePrice.value,
-    amount: amount.value,
+    amount: finalAmount,
     direction: alertDirection.value,
     isTodayNewPosition: isTodayNewPosition.value
   })
@@ -95,17 +125,6 @@ const handleClear = () => {
 const handleCancel = () => {
   isVisible.value = false
   resolvePromise?.({ confirmed: false })
-}
-
-// 清仓：返回特殊标记让调用方进行二次确认
-const handleClearPosition = () => {
-  isVisible.value = false
-  resolvePromise?.({
-    confirmed: true,
-    clearPosition: true,
-    price: tradePrice.value,
-    amount: -currentAmount.value // 减去全部持仓
-  })
 }
 
 defineExpose({ open })
@@ -156,6 +175,30 @@ defineExpose({ open })
 
             <!-- 添加/交易模式 -->
             <template v-else>
+              <!-- 调仓模式：先选方向 -->
+              <div v-if="modalType === 'transaction'" class="trade-direction-group">
+                <button
+                  class="direction-btn buy"
+                  :class="{ active: tradeDirection === 'buy' }"
+                  @click="tradeDirection = 'buy'"
+                >
+                  ➕ {{ t('tradeBuy') }}
+                </button>
+                <button
+                  class="direction-btn sell"
+                  :class="{ active: tradeDirection === 'sell' }"
+                  @click="tradeDirection = 'sell'"
+                >
+                  ➖ {{ t('tradeSell') }}
+                </button>
+                <button
+                  v-if="currentAmount > 0"
+                  class="clear-position-btn"
+                  :class="{ active: tradeDirection === 'clear' }"
+                  @click="tradeDirection = 'clear'"
+                >🧹 {{ t('clearPosition') }}</button>
+              </div>
+              <!-- 选完方向后显示价格输入 -->
               <div class="modal-input-group">
                 <input
                   type="number"
@@ -167,22 +210,17 @@ defineExpose({ open })
                 />
                 <label>{{ modalType === 'add' ? t('initialCost') : t('tradePrice') }}</label>
               </div>
-              <div class="modal-input-group">
+              <!-- 添加模式或有持仓时显示手数输入（清仓不需要） -->
+              <div v-if="modalType === 'add' || tradeDirection !== 'clear'" class="modal-input-group">
                 <input
                   type="number"
                   v-model.number="amount"
                   class="modal-input"
                   ref="qtyInput"
                   @keyup.enter="handleConfirm"
-                  :min="modalType === 'add' ? 1 : undefined"
+                  :min="0"
                 />
                 <label>{{ modalType === 'add' ? t('lotsHint') : t('deltaLots') }}</label>
-                <button
-                  v-if="modalType === 'transaction' && currentAmount > 0"
-                  class="clear-position-btn"
-                  @click="handleClearPosition"
-                  :title="t('clearPosition')"
-                >🧹</button>
               </div>
               <!-- 当日新建仓选项 -->
               <div v-if="modalType === 'add'" class="modal-checkbox-group">
@@ -194,6 +232,9 @@ defineExpose({ open })
               </div>
             </template>
 
+            <transition name="hint-fade">
+              <p v-if="shakeHint" class="modal-hint">{{ shakeHint }}</p>
+            </transition>
             <p v-if="modalMessage" class="modal-msg">
               <template v-if="modalType === 'alert' && parsedMessage.currentPrice !== null">
                 {{ parsedMessage.stockName }} ({{ parsedMessage.currentPriceText }}:
@@ -201,8 +242,8 @@ defineExpose({ open })
                   {{ parsedMessage.currentPrice.toFixed(2) }}
                 </span>)
               </template>
-              <template v-else-if="modalType === 'transaction' && currentAmount > 0">
-                {{ modalMessage }} (<span class="current-amount">{{ t('currentLots') }}: {{ currentAmount }}</span>)
+              <template v-else-if="modalType === 'transaction'">
+                {{ modalMessage }}--{{ t('currentLots') }} <span class="current-amount">{{ currentAmount }}</span> {{ t('lotsUnit') }}
               </template>
               <template v-else>{{ modalMessage }}</template>
             </p>
@@ -271,6 +312,31 @@ defineExpose({ open })
   text-align: left;
 }
 
+.modal-hint {
+  font-size: 11px;
+  color: #e74c3c;
+  text-align: center;
+  animation: hint-shake 0.3s ease;
+}
+
+@keyframes hint-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+.hint-fade-enter-active,
+.hint-fade-leave-active {
+  transition: opacity 0.3s;
+}
+
+.hint-fade-enter-from,
+.hint-fade-leave-to {
+  opacity: 0;
+}
+
 .modal-form {
   display: flex;
   flex-direction: column;
@@ -334,6 +400,78 @@ defineExpose({ open })
   color: #f1c40f;
 }
 
+.direction-btn.buy.active {
+  background-color: rgba(231, 76, 60, 0.15);
+  border-color: var(--ev-c-pink);
+  color: var(--ev-c-pink);
+}
+
+.direction-btn.sell.active {
+  background-color: rgba(52, 152, 219, 0.15);
+  border-color: var(--ev-c-blue);
+  color: var(--ev-c-blue);
+}
+
+/* 当前价格涨跌颜色 */
+.trade-direction-group {
+  display: flex;
+  margin-top: 2px;
+  border: 1px solid #3a3d4a;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.trade-direction-group .direction-btn,
+.trade-direction-group .clear-position-btn {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+  border-right: 1px solid #3a3d4a;
+  padding: 5px 0;
+  text-align: center;
+  background-color: #242736;
+  color: #888;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 0;
+  position: relative;
+}
+
+.trade-direction-group > :last-child {
+  border-right: none;
+}
+
+.trade-direction-group .direction-btn:hover,
+.trade-direction-group .clear-position-btn:hover {
+  background-color: #2a2e42;
+  color: #ccc;
+}
+
+.trade-direction-group .direction-btn.active {
+  background-color: rgba(241, 196, 15, 0.1);
+  border-color: transparent;
+  color: #f1c40f;
+}
+
+.trade-direction-group .direction-btn.buy.active {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: var(--ev-c-pink);
+  box-shadow: inset 0 -2px 0 var(--ev-c-pink);
+}
+
+.trade-direction-group .direction-btn.sell.active {
+  background-color: rgba(52, 152, 219, 0.1);
+  color: var(--ev-c-blue);
+  box-shadow: inset 0 -2px 0 var(--ev-c-blue);
+}
+
+.trade-direction-group .clear-position-btn.active {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: #e74c3c;
+  box-shadow: inset 0 -2px 0 #e74c3c;
+}
+
 /* 当前价格涨跌颜色 */
 .current-price {
   font-weight: bold;
@@ -365,9 +503,9 @@ defineExpose({ open })
   background-color: rgba(231, 76, 60, 0.2);
 }
 
-/* 清仓按钮 */
+/* 清仓按钮（tab 外的基础样式，被 .trade-direction-group 内样式覆盖） */
 .clear-position-btn {
-  padding: 2px 8px;
+  padding: 4px 6px;
   border: 1px solid rgba(231, 76, 60, 0.4);
   border-radius: 4px;
   background-color: rgba(231, 76, 60, 0.1);
@@ -381,6 +519,12 @@ defineExpose({ open })
 .clear-position-btn:hover {
   background-color: rgba(231, 76, 60, 0.3);
   border-color: #e74c3c;
+}
+
+.clear-position-btn.active {
+  background-color: rgba(231, 76, 60, 0.25);
+  border-color: #e74c3c;
+  color: #e74c3c;
 }
 
 /* 复选框样式 */
