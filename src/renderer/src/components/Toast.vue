@@ -93,8 +93,7 @@ const queueInfo = computed(() =>
         :class="['toast-container', typeClass, { 'toast-interactive': toastType === 'alert' }]"
         @click="toastType === 'alert' && hide()"
       >
-        <span class="toast-icon">{{ icon }}</span>
-        <span class="toast-message">{{ msg }}</span>
+        <span class="toast-message"><span class="toast-icon">{{ icon }}</span>{{ msg }}</span>
         <span v-if="toastType === 'alert'" class="toast-queue">{{ queueInfo }}</span>
         <span v-if="toastType === 'alert'" class="toast-close">✕</span>
       </div>
@@ -108,19 +107,29 @@ const queueInfo = computed(() =>
   top: 16px;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 4px; /* Shrunk from 8px */
-  padding: 4px 12px; /* Shrunk from 4px 16px */
-  border-radius: 12px; /* Shrunk from 20px */
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 12px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   z-index: 11000;
   pointer-events: none;
-  font-size: 11px; /* Shrunk from 13px */
+  font-size: 11px;
   font-weight: 500;
   color: white;
+  max-width: 80vw;
+  width: max-content;
+}
+
+.toast-message {
+  white-space: normal;
+  word-break: break-all;
+  text-align: left;
+  flex: 1;
+  min-width: 0;
 }
 
 .toast-interactive {
@@ -156,7 +165,8 @@ const queueInfo = computed(() =>
 }
 
 .toast-icon {
-  font-size: 12px; /* Shrunk from 14px */
+  font-size: 12px;
+  flex-shrink: 0;
 }
 
 .toast-close {

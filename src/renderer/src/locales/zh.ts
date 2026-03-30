@@ -43,7 +43,6 @@ export default {
   noStocks: '暂无股票',
   backToBall: '返回悬浮球',
   goToSetting: '前往设置页面',
-  addStock: '添加股票',
   deleteSelected: '删除选中',
   clearAll: '清空列表',
   dailyPnlTotal: '当日盈亏合计',
@@ -60,6 +59,8 @@ export default {
   priceCopied: '价格已复制!',
   dailyPnlCopied: '当日盈亏已复制!',
   totalPnlCopied: '总盈亏已复制!',
+  switchToGold: '切换到黄金',
+  switchToStock: '切换到股票',
 
   // Price Alert
   priceAlert: '价格提醒',
@@ -102,4 +103,11 @@ export default {
 
   // FloatingBall.vue
   dragToMove: '拖拽移动，左击展开，右击隐藏',
+
+  // GoldView.vue
+  metalGold: '黄金',
+  metalSilver: '白银',
+  metalPlatinum: '铂金',
+  metalPalladium: '钯金',
+  fetchError: '数据获取失败，稍后再看',
 }

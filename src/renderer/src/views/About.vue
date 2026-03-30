@@ -3,6 +3,7 @@ import DragHandle from '../components/DragHandle.vue'
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { getLastMainView } from '../router'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -15,9 +16,10 @@ const containerRef = ref<HTMLElement | null>(null)
 let resizeObserver: ResizeObserver | null = null
 
 const backToBall = () => {
-  // 返回悬浮球形态
+  // 返回上一个主视图（stock 或 gold），并缩小到球大小
+  const lastView = getLastMainView()
   window.electron.ipcRenderer.send('resize-window', 60, 60)
-  router.push('/ball')
+  router.push(lastView === '/' ? '/ball' : '/ball')
 }
 
 const backToSetting = () => {

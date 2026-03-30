@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import DragHandle from '../components/DragHandle.vue'
 import ToggleSwitch from '../components/ToggleSwitch.vue'
+import { getLastMainView } from '../router'
 
 const { t, locale } = useI18n()
 const router = useRouter()
@@ -102,7 +103,7 @@ const toggleShowBallPnl = () => {
 }
 
 const goBack = () => {
-  router.push('/')
+  router.push(getLastMainView())
 }
 
 const goToAbout = () => {

@@ -48,6 +48,11 @@ let timer: ReturnType<typeof setInterval> | null = null
 const containerRef = ref<HTMLElement | null>(null)
 let resizeObserver: ResizeObserver | null = null
 
+// 前往黄金页面
+const goToGold = () => {
+  router.push('/gold')
+}
+
 // Qty 列的展示模式：0=持仓手数, 1=价格提醒
 const qtyDisplayMode = ref(0)
 const toggleQtyDisplayMode = () => {
@@ -906,6 +911,9 @@ onUnmounted(() => {
 
     <div class="summary-section">
       <div class="bottom-actions">
+        <button class="mode-btn" @click="goToGold" :title="t('switchToGold')">
+          <span class="mode-icon">🟨</span>
+        </button>
         <div class="input-group">
           <input
             v-model="inputCode"
@@ -916,7 +924,7 @@ onUnmounted(() => {
           <button class="add-btn" @click="addStock">➕</button>
         </div>
       </div>
-      <div class="summary-pnl" :title="t('toggleHide')" @click="toggleCensor">
+      <div class="summary-pnl">
         <span
           :class="[
             'visible-summary',
@@ -945,7 +953,7 @@ onUnmounted(() => {
           >
           <span v-else>❇❇</span>
         </span>
-        <span class="lock-icon">{{ isCensored ? '🔒' : '🔓' }}</span>
+        <span class="lock-icon" @click="toggleCensor" :title="t('toggleHide')">{{ isCensored ? '🔒' : '🔓' }}</span>
       </div>
       <button
         v-if="stocks.length > 0"
@@ -1023,6 +1031,38 @@ onUnmounted(() => {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.mode-btn {
+  background-color: rgba(255, 215, 0, 0.1);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.mode-btn:hover {
+  background-color: rgba(255, 215, 0, 0.3);
+}
+
+.mode-btn:active {
+  transform: scale(0.95);
+}
+
+.mode-icon {
+  font-size: 14px;
+  opacity: 0.6;
+  transition: all 0.3s ease;
+}
+
+.mode-btn:hover .mode-icon {
+  opacity: 1;
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
 }
 
 .input-group {
@@ -1188,6 +1228,13 @@ onUnmounted(() => {
   opacity: 0.6;
   transition: all 0.3s ease;
   margin-left: auto;
+  cursor: pointer;
+}
+
+.lock-icon:hover {
+  opacity: 1;
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
 }
 
 .clickable-th {
@@ -1265,16 +1312,9 @@ onUnmounted(() => {
   align-items: center;
   justify-content: flex-end;
   margin-left: 8px;
-  cursor: pointer;
   padding: 1px 6px;
   border-radius: 6px;
   transition: background-color 0.2s;
-}
-
-.summary-pnl:hover .lock-icon {
-  opacity: 1;
-  transform: scale(1.2);
-  filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
 }
 
 .pnl-label {
@@ -1294,6 +1334,7 @@ onUnmounted(() => {
 .visible-summary:hover {
   background-color: rgba(255, 255, 255, 0.05);
   border-radius: 6px;
+  cursor: pointer;
 }
 
 .code-sub {

@@ -2,6 +2,7 @@
 import { useRouter } from 'vue-router'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { getLastMainView } from '../router'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -206,8 +207,8 @@ onUnmounted(() => {
 
 const goToDetail = () => {
   if (isDragging.value) return // 如果是拖拽结束，不触发点击
-  // 点击后切换路由到列表页，然后在主进程通知放大窗口
-  router.push('/')
+  // 点击后切换路由到上一个主视图页（stock 或 gold）
+  router.push(getLastMainView())
 }
 
 const onContextMenu = (e: MouseEvent) => {

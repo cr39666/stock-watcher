@@ -43,7 +43,6 @@ export default {
   noStocks: 'no stocks',
   backToBall: 'Back to ball',
   goToSetting: 'Go to setting page',
-  addStock: 'Add Stock',
   deleteSelected: 'Delete Selected',
   clearAll: 'Clear All',
   dailyPnlTotal: 'Daily PnL Total',
@@ -60,6 +59,8 @@ export default {
   priceCopied: 'Price Copied!',
   dailyPnlCopied: 'Daily PnL Copied!',
   totalPnlCopied: 'Total PnL Copied!',
+  switchToGold: 'Switch to Gold',
+  switchToStock: 'Switch to Stock',
 
   // Price Alert
   priceAlert: 'Price Alert',
@@ -102,4 +103,11 @@ export default {
 
   // FloatingBall.vue
   dragToMove: 'Drag to move, left click to expand, right click to hide',
+
+  // GoldView.vue
+  metalGold: 'Gold',
+  metalSilver: 'Silver',
+  metalPlatinum: 'Platinum',
+  metalPalladium: 'Palladium',
+  fetchError: 'Data unavailable, check back later',
 }
