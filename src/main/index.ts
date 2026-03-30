@@ -183,7 +183,8 @@ if (app.isPackaged && process.platform === 'win32') {
   }
 }
 
-const gotTheLock = app.requestSingleInstanceLock()
+// 单实例锁（仅打包环境生效，开发环境允许多开便于调试）
+const gotTheLock = !app.isPackaged || app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
   app.quit()
