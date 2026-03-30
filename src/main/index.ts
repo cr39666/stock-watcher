@@ -1,5 +1,6 @@
 import { app, shell, BrowserWindow, ipcMain, Tray, Menu, globalShortcut, Notification } from 'electron'
-import { join } from 'path'
+import { join, dirname } from 'path'
+import { execSync } from 'child_process'
 import icon from '../../resources/icon.png?asset'
 import { autoUpdater } from 'electron-updater'
 
@@ -163,6 +164,23 @@ function createTray(): void {
 
   tray.setToolTip(texts.tooltip)
   tray.setContextMenu(contextMenu)
+}
+
+// 启动时检测安装路径是否被挪动，若已挪动则修正注册表，确保更新安装到当前目录
+if (app.isPackaged && process.platform === 'win32') {
+  try {
+    const exePath = app.getPath('exe')
+    const currentDir = dirname(exePath)
+    const appId = 'com.electron.app'
+    const regKey = `HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${appId}_is1`
+    const result = execSync(`reg query "${regKey}" /v InstallLocation`, { encoding: 'utf-8' })
+    const match = result.match(/REG_SZ\s+(.+)/)
+    if (match && match[1].trim() !== currentDir) {
+      execSync(`reg add "${regKey}" /v InstallLocation /t REG_SZ /d "${currentDir}" /f`, { encoding: 'utf-8' })
+    }
+  } catch {
+    // 注册表不存在或查询失败，忽略
+  }
 }
 
 const gotTheLock = app.requestSingleInstanceLock()
