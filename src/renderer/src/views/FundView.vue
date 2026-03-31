@@ -273,6 +273,12 @@ const calculateMarketValue = (fund: FundItem): number => {
   return quote.nav * fund.shares
 }
 
+// 最后一列展示模式：0=持有天数, 1=持仓市值
+const lastColMode = ref(0)
+const toggleLastColMode = () => {
+  lastColMode.value = (lastColMode.value + 1) % 2
+}
+
 // 总持仓盈亏
 const totalPnl = computed(() => {
   return funds.value.reduce((total, fund) => {
@@ -431,7 +437,13 @@ onUnmounted(() => {
             <th :title="t('change')" @click="toggleSort('chg')" class="clickable-th">
               Chg% <span class="sort-icon">{{ sortColumn === 'chg' ? (sortOrder === 'asc' ? '↑' : '↓') : '' }}</span>
             </th>
-            <th :title="t('holdingDays')">Days</th>
+            <th
+              :title="lastColMode === 0 ? t('holdingDays') : t('marketValue')"
+              @click="toggleLastColMode"
+              class="clickable-th"
+            >
+              {{ lastColMode === 0 ? 'Days' : 'Val' }} <span class="toggle-icon">🔁</span>
+            </th>
           </tr>
         </thead>
         <tbody>
@@ -478,7 +490,10 @@ onUnmounted(() => {
               <span v-else>❇❇</span>
             </td>
             <td class="days-cell">
-              <span v-if="!isCensored">{{ calcHoldingDays(fund) ?? '--' }}</span>
+              <span v-if="!isCensored">
+                <template v-if="lastColMode === 0">{{ calcHoldingDays(fund) ?? '--' }}</template>
+                <template v-else>{{ calculateMarketValue(fund) > 0 ? calculateMarketValue(fund).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '--' }}</template>
+              </span>
               <span v-else>❇❇</span>
             </td>
           </tr>
