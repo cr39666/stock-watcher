@@ -174,19 +174,24 @@ function createTray(): void {
 }
 
 // 启动时检测安装路径是否被挪动，若已挪动则修正注册表，确保更新安装到当前目录
+// NSIS 可能在 HKCU 或 HKLM 中记录 InstallLocation，两处都需要检查
 if (app.isPackaged && process.platform === 'win32') {
-  try {
-    const exePath = app.getPath('exe')
-    const currentDir = dirname(exePath)
-    const appId = 'com.electron.app'
-    const regKey = `HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${appId}_is1`
-    const result = execSync(`reg query "${regKey}" /v InstallLocation`, { encoding: 'utf-8' })
-    const match = result.match(/REG_SZ\s+(.+)/)
-    if (match && match[1].trim() !== currentDir) {
-      execSync(`reg add "${regKey}" /v InstallLocation /t REG_SZ /d "${currentDir}" /f`, { encoding: 'utf-8' })
+  const exePath = app.getPath('exe')
+  const currentDir = dirname(exePath).replace(/\\$/, '')
+  const appId = 'com.electron.app'
+  const regSubKey = `Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${appId}_is1`
+
+  for (const hive of ['HKCU', 'HKLM']) {
+    try {
+      const regKey = `${hive}\\${regSubKey}`
+      const result = execSync(`reg query "${regKey}" /v InstallLocation`, { encoding: 'utf-8' })
+      const match = result.match(/REG_SZ\s+(.+)/)
+      if (match && match[1].trim().replace(/\\$/, '') !== currentDir) {
+        execSync(`reg add "${regKey}" /v InstallLocation /t REG_SZ /d "${currentDir}\\" /f`, { encoding: 'utf-8' })
+      }
+    } catch {
+      // 该注册表项不存在，跳过
     }
-  } catch {
-    // 注册表不存在或查询失败，忽略
   }
 }
 
@@ -208,6 +213,8 @@ app.on('second-instance', () => {
 app.whenReady().then(() => {
   if (process.platform === 'win32') {
     app.setAppUserModelId('com.electron')
+    // 确保更新安装到当前 exe 所在目录，而非注册表中可能过时的旧路径
+    autoUpdater.installDirectory = dirname(app.getPath('exe'))
   }
 
   createTray()
