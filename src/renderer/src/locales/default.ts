@@ -36,8 +36,8 @@ export default {
   whatsNew: '更新内容 What\'s New',
 
   // MainList.vue
-  name: '名称 Name',
-  code: 'Code',
+  name: '股票名称 Stock Name',
+  code: 'Stock Code',
   currentPrice: '当前价 Price',
   dailyPnl: '当日盈亏 Daily PnL',
   totalPnl: '总盈亏 Total PnL',
@@ -121,8 +121,8 @@ export default {
   confirmUpdate: '下载更新',
 
   // FundView.vue
-  noFunds: '暂无基金',
-  fundCode: '基金代码',
+  noFunds: 'No Funds',
+  fundCode: 'Fund Code',
   fundCodeInvalid: '请输入6位基金代码',
   fundExists: '该基金已存在',
   fundAdded: '基金已添加!',

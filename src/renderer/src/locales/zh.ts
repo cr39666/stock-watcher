@@ -36,7 +36,7 @@ export default {
   whatsNew: '更新内容',
 
   // MainList.vue
-  name: '名称',
+  name: '股票名称',
   code: '股票代码',
   currentPrice: '当前价',
   dailyPnl: '当日盈亏',

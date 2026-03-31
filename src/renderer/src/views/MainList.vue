@@ -1101,7 +1101,7 @@ onUnmounted(() => {
   background-color: #2f3241;
   color: white;
   outline: none;
-  width: 60px;
+  width: 74px;
 }
 
 .add-btn {

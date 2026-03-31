@@ -36,8 +36,8 @@ export default {
   whatsNew: "What's New",
 
   // MainList.vue
-  name: 'Name',
-  code: 'Code',
+  name: 'Stock Name',
+  code: 'Stock Code',
   currentPrice: 'Current Price',
   dailyPnl: 'Daily PnL',
   totalPnl: 'Total PnL',
