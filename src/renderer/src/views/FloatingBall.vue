@@ -26,7 +26,9 @@ interface StockQuote {
 
 const totalDailyPnl = ref(0)
 const hasStocks = ref(false)
-const showBallPnl = ref(true)
+const goldPrice = ref(0)
+// 悬浮球显示模式：'stock'=股票盈亏, 'gold'=黄金实时价, 'none'=不显示
+const ballDisplayMode = ref('stock')
 let pnlTimer: ReturnType<typeof setInterval> | null = null
 
 const getTodayStr = () => {
@@ -44,9 +46,18 @@ const isTradingTime = () => {
 
 // 通过 JSONP 拉取最新行情并更新 localStorage
 const fetchAndRefreshPnl = () => {
-  // 同步读取开关设置
-  const pnlSetting = localStorage.getItem('show_ball_pnl')
-  showBallPnl.value = pnlSetting === null ? true : JSON.parse(pnlSetting)
+  // 同步读取显示模式
+  const modeSetting = localStorage.getItem('ball_display_mode')
+  ballDisplayMode.value = modeSetting || 'stock'
+
+  if (ballDisplayMode.value === 'none') return
+
+  if (ballDisplayMode.value === 'gold') {
+    fetchGoldPrice()
+    return
+  }
+
+  // stock 模式：获取股票盈亏
 
   const stocksRaw = localStorage.getItem('my_stocks')
   if (!stocksRaw) {
@@ -136,7 +147,24 @@ const calcPnl = (stocks: StockItem[], quotes: Record<string, StockQuote>) => {
   }, 0)
 }
 
+// 获取黄金实时价格（Gold API → CNY 克价）
+const OZ_TO_GRAM = 31.1035
+const fetchGoldPrice = async () => {
+  try {
+    const res = await fetch('https://api.gold-api.com/price/XAU/CNY')
+    if (!res.ok) return
+    const data = await res.json()
+    if (data?.price) {
+      goldPrice.value = data.price / OZ_TO_GRAM
+    }
+  } catch { /* ignore */ }
+}
+
 const pnlText = computed(() => {
+  if (ballDisplayMode.value === 'gold') {
+    if (goldPrice.value <= 0) return '--'
+    return goldPrice.value.toFixed(1)
+  }
   const v = totalDailyPnl.value
   if (v === 0) return '0'
   const abs = Math.abs(v)
@@ -145,6 +173,7 @@ const pnlText = computed(() => {
 })
 
 const pnlColorClass = computed(() => {
+  if (ballDisplayMode.value === 'gold') return 'pnl-gold'
   if (totalDailyPnl.value > 0) return 'pnl-red'
   if (totalDailyPnl.value < 0) return 'pnl-blue'
   return 'pnl-gray'
@@ -199,10 +228,18 @@ onMounted(() => {
   window.electron.ipcRenderer.send('resize-window', 80, 80)
   fetchAndRefreshPnl()
   pnlTimer = setInterval(fetchAndRefreshPnl, 1000)
+
+  // 监听右键菜单切换显示模式
+  window.electron.ipcRenderer.on('set-ball-display-mode', (_event, mode: string) => {
+    ballDisplayMode.value = mode
+    localStorage.setItem('ball_display_mode', mode)
+    fetchAndRefreshPnl()
+  })
 })
 
 onUnmounted(() => {
   if (pnlTimer) clearInterval(pnlTimer)
+  window.electron.ipcRenderer.removeAllListeners('set-ball-display-mode')
 })
 
 const goToDetail = () => {
@@ -227,7 +264,7 @@ const onContextMenu = (e: MouseEvent) => {
     :title="t('dragToMove')"
   >
     <img src="../assets/electron.svg" class="ball-icon" alt="logo" />
-    <span v-if="hasStocks && showBallPnl" class="pnl-text" :class="pnlColorClass">{{ pnlText }}</span>
+    <span v-if="ballDisplayMode !== 'none' && (ballDisplayMode === 'gold' || hasStocks)" class="pnl-text" :class="pnlColorClass">{{ pnlText }}</span>
   </div>
 </template>
 
@@ -295,6 +332,9 @@ const onContextMenu = (e: MouseEvent) => {
 }
 .pnl-gray {
   color: var(--ev-c-text-3);
+}
+.pnl-gold {
+  color: #f0d060;
 }
 
 @keyframes ball-rotate {

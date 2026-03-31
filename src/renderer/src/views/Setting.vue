@@ -13,7 +13,9 @@ let resizeObserver: ResizeObserver | null = null
 
 const ballAlwaysOnTop = ref(true)
 const windowAlwaysOnTop = ref(false)
-const showBallPnl = ref(true)
+
+// 悬浮球显示模式：'stock'=股票盈亏, 'gold'=黄金实时价, 'none'=不显示
+const ballDisplayMode = ref('stock')
 
 // 快捷键设置
 const globalHotkey = ref('')
@@ -97,9 +99,9 @@ const toggleWindowAlwaysOnTop = () => {
   })
 }
 
-const toggleShowBallPnl = () => {
-  showBallPnl.value = !showBallPnl.value
-  localStorage.setItem('show_ball_pnl', JSON.stringify(showBallPnl.value))
+const changeBallDisplayMode = (mode: string) => {
+  ballDisplayMode.value = mode
+  localStorage.setItem('ball_display_mode', mode)
 }
 
 const showFund = ref(false)
@@ -132,9 +134,9 @@ onMounted(async () => {
   if (windowSaved !== null) {
     windowAlwaysOnTop.value = JSON.parse(windowSaved)
   }
-  const pnlSaved = localStorage.getItem('show_ball_pnl')
-  if (pnlSaved !== null) {
-    showBallPnl.value = JSON.parse(pnlSaved)
+  const modeSaved = localStorage.getItem('ball_display_mode')
+  if (modeSaved !== null) {
+    ballDisplayMode.value = modeSaved
   }
   const fundSaved = localStorage.getItem('show_fund')
   if (fundSaved !== null) {
@@ -198,8 +200,14 @@ onUnmounted(() => {
         <ToggleSwitch :active="windowAlwaysOnTop" @toggle="toggleWindowAlwaysOnTop" />
       </div>
       <div class="setting-item">
-        <span class="label">{{ t('showBallPnl') }}</span>
-        <ToggleSwitch :active="showBallPnl" @toggle="toggleShowBallPnl" />
+        <span class="label">{{ t('ballDisplayMode') }}</span>
+        <div class="lang-select">
+          <span class="lang-option" :class="{ active: ballDisplayMode === 'stock' }" @click="changeBallDisplayMode('stock')">{{ t('ballModeStock') }}</span>
+          <span class="lang-divider">|</span>
+          <span class="lang-option" :class="{ active: ballDisplayMode === 'gold' }" @click="changeBallDisplayMode('gold')">{{ t('ballModeGold') }}</span>
+          <span class="lang-divider">|</span>
+          <span class="lang-option" :class="{ active: ballDisplayMode === 'none' }" @click="changeBallDisplayMode('none')">{{ t('ballModeNone') }}</span>
+        </div>
       </div>
       <div class="setting-item">
         <span class="label">{{ t('showFund') }}</span>

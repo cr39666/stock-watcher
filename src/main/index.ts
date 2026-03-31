@@ -21,10 +21,16 @@ const trayTexts: Record<string, { openMonitor: string; openBall: string; quit: s
 }
 
 // 悬浮球右键菜单多语言文本
-const ballMenuTexts: Record<string, { hideBall: string }> = {
-  default: { hideBall: 'Hide Ball' },
-  en: { hideBall: 'Hide Ball' },
-  zh: { hideBall: '隐藏悬浮球' }
+const ballMenuTexts: Record<string, {
+  hideBall: string
+  displayLabel: string
+  modeStock: string
+  modeGold: string
+  modeNone: string
+}> = {
+  default: { hideBall: 'Hide Ball', displayLabel: 'Display', modeStock: 'Stock PnL', modeGold: 'Gold Price', modeNone: 'Off' },
+  en: { hideBall: 'Hide Ball', displayLabel: 'Display', modeStock: 'Stock PnL', modeGold: 'Gold Price', modeNone: 'Off' },
+  zh: { hideBall: '隐藏悬浮球', displayLabel: '显示金额', modeStock: '股票盈亏', modeGold: '黄金价格', modeNone: '不显示' }
 }
 
 function applyAlwaysOnTop(w: number, h: number): void {
@@ -214,7 +220,7 @@ app.whenReady().then(() => {
   if (process.platform === 'win32') {
     app.setAppUserModelId('com.electron')
     // 确保更新安装到当前 exe 所在目录，而非注册表中可能过时的旧路径
-    autoUpdater.installDirectory = dirname(app.getPath('exe'))
+    ;(autoUpdater as any).installDirectory = dirname(app.getPath('exe'))
   }
 
   createTray()
@@ -274,6 +280,34 @@ app.whenReady().then(() => {
   ipcMain.on('show-ball-context-menu', (event) => {
     const texts = ballMenuTexts[currentLang] || ballMenuTexts['default']
     const menu = Menu.buildFromTemplate([
+      {
+        label: texts.displayLabel,
+        submenu: [
+          {
+            label: texts.modeStock,
+            type: 'radio',
+            checked: true,
+            click: () => {
+              mainWindow?.webContents.send('set-ball-display-mode', 'stock')
+            }
+          },
+          {
+            label: texts.modeGold,
+            type: 'radio',
+            click: () => {
+              mainWindow?.webContents.send('set-ball-display-mode', 'gold')
+            }
+          },
+          {
+            label: texts.modeNone,
+            type: 'radio',
+            click: () => {
+              mainWindow?.webContents.send('set-ball-display-mode', 'none')
+            }
+          }
+        ]
+      },
+      { type: 'separator' },
       {
         label: texts.hideBall,
         click: () => {
