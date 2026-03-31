@@ -281,6 +281,13 @@ const calculatePnl = (fund: FundItem): number | null => {
   return (quote.nav - fund.cost) * fund.shares
 }
 
+// 计算收益率 = (最新净值 - 成本净值) / 成本净值 × 100%
+const calculateYield = (fund: FundItem): number | null => {
+  const quote = quotes.value[fund.code]
+  if (!quote || fund.cost <= 0) return null
+  return ((quote.nav - fund.cost) / fund.cost) * 100
+}
+
 // 计算持仓市值
 const calculateMarketValue = (fund: FundItem): number => {
   const quote = quotes.value[fund.code]
@@ -355,6 +362,10 @@ const displayFunds = computed(() => {
         case 'chg':
           valA = quotes.value[a.code]?.dayGrowth || 0
           valB = quotes.value[b.code]?.dayGrowth || 0
+          break
+        case 'yield':
+          valA = calculateYield(a) ?? -999999999
+          valB = calculateYield(b) ?? -999999999
           break
       }
       return sortOrder.value === 'asc' ? valA - valB : valB - valA
@@ -460,6 +471,12 @@ onUnmounted(() => {
                 sortColumn === 'chg' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
               }}</span>
             </th>
+            <th :title="t('yieldRate')" @click="toggleSort('yield')" class="clickable-th">
+              Yield
+              <span class="sort-icon">{{
+                sortColumn === 'yield' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
+              }}</span>
+            </th>
             <th
               :title="lastColMode === 0 ? t('holdingDays') : t('marketValue')"
               @click="toggleLastColMode"
@@ -512,6 +529,15 @@ onUnmounted(() => {
               </span>
               <span v-else>❇❇</span>
             </td>
+            <td :class="(calculateYield(fund) || 0) >= 0 ? 'red' : 'green'">
+              <span v-if="!isCensored">
+                <span v-if="calculateYield(fund) !== null">
+                  {{ calculateYield(fund)! > 0 ? '+' : '' }}{{ calculateYield(fund)!.toFixed(2) }}%
+                </span>
+                <span v-else>--</span>
+              </span>
+              <span v-else>❇❇</span>
+            </td>
             <td class="days-cell">
               <span v-if="!isCensored">
                 <template v-if="lastColMode === 0">{{ calcHoldingDays(fund) ?? '--' }}</template>
@@ -527,7 +553,7 @@ onUnmounted(() => {
             </td>
           </tr>
           <tr v-if="funds.length === 0">
-            <td colspan="5" class="empty-row">{{ t('noFunds') }}</td>
+            <td colspan="6" class="empty-row">{{ t('noFunds') }}</td>
           </tr>
         </tbody>
       </table>
@@ -555,9 +581,9 @@ onUnmounted(() => {
         <span
           :class="['visible-summary', totalPnl > 0 ? 'red' : totalPnl < 0 ? 'green' : 'gray']"
           @click.stop="copyTotalPnl"
-          :title="t('totalPnlCopied')"
+          :title="t('totalPnl')"
         >
-          <span class="pnl-label">PnL:</span>
+          <span class="pnl-label">T.PnL:</span>
           <span v-if="!isCensored">{{ totalPnl > 0 ? '+' : '' }}{{ totalPnl.toFixed(1) }}</span>
           <span v-else>❇❇</span>
         </span>
@@ -686,7 +712,8 @@ onUnmounted(() => {
 }
 .fund-table td:nth-child(2),
 .fund-table td:nth-child(3),
-.fund-table td:nth-child(4) {
+.fund-table td:nth-child(4),
+.fund-table td:nth-child(5) {
   font-size: 14px;
 }
 
@@ -888,6 +915,7 @@ onUnmounted(() => {
   align-items: center;
   font-size: 13px;
   padding: 0 4px;
+  margin-right: auto;
   cursor: pointer;
 }
 .visible-summary:hover {

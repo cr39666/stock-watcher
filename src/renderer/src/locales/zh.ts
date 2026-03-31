@@ -136,5 +136,6 @@ export default {
   fundShares: '持有份额',
   clickToEdit: '点击编辑持仓',
   holdingDays: '持有天数',
+  yieldRate: '收益率',
   fundBuyDate: '买入日期',
 }

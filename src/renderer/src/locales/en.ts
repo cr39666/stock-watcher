@@ -136,5 +136,6 @@ export default {
   fundShares: 'Shares',
   clickToEdit: 'Click to edit position',
   holdingDays: 'Holding Days',
+  yieldRate: 'Yield Rate',
   fundBuyDate: 'Buy Date',
 }
