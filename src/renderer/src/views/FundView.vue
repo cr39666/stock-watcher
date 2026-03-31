@@ -493,7 +493,7 @@ onUnmounted(() => {
             :class="{ 'row-selected': selectedCodes.includes(fund.code) }"
             @click="toggleRowSelection(fund.code)"
           >
-            <td :class="['name-cell', (quotes[fund.code]?.dayGrowth || 0) >= 0 ? 'red' : 'green']">
+            <td :class="['name-cell', (quotes[fund.code]?.dayGrowth || 0) >= 0 ? 'red' : 'green']" :title="quotes[fund.code]?.name || fund.code">
               <template v-if="!isCensored">
                 <div v-if="nameDisplayMode === 0">{{ formatName(quotes[fund.code]?.name) }}</div>
                 <div v-else>{{ fund.code }}</div>
