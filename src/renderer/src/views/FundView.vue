@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n'
 import DragHandle from '../components/DragHandle.vue'
 import Confirm from '../components/Confirm.vue'
 import Toast from '../components/Toast.vue'
+import FundEditModal from '../components/FundEditModal.vue'
 
 const { t } = useI18n()
 const router = useRouter()
@@ -42,17 +43,10 @@ const toggleCensor = () => {
 // --- 组件引用 ---
 const confirmRef = ref<InstanceType<typeof Confirm> | null>(null)
 const toastRef = ref<InstanceType<typeof Toast> | null>(null)
+const fundEditRef = ref<InstanceType<typeof FundEditModal> | null>(null)
 
-// 添加/编辑持仓弹窗
-const showEditModal = ref(false)
-const editCode = ref('')
-const editCost = ref(0)
-const editShares = ref(0)
-const editName = ref('')
-const editBuyDate = ref('')
-const editIsNew = ref(true) // true=添加, false=编辑
-
-const openEditModal = (
+// 打开编辑弹窗并处理结果
+const openEditModal = async (
   code: string,
   name: string,
   cost: number,
@@ -60,40 +54,28 @@ const openEditModal = (
   buyDate: string,
   isNew: boolean
 ) => {
-  editCode.value = code
-  editName.value = name
-  editCost.value = cost
-  editShares.value = shares
-  editBuyDate.value = buyDate
-  editIsNew.value = isNew
-  showEditModal.value = true
-}
+  const result = await fundEditRef.value?.open(code, name, cost, shares, buyDate, isNew)
+  if (!result) return // 用户取消
 
-const confirmEdit = () => {
-  if (editIsNew.value) {
+  if (result.isNew) {
     funds.value.push({
-      code: editCode.value,
-      cost: editCost.value,
-      shares: editShares.value,
-      buyDate: editBuyDate.value || undefined
+      code: result.code,
+      cost: result.cost,
+      shares: result.shares,
+      buyDate: result.buyDate || undefined
     })
     inputCode.value = ''
     toastRef.value?.show(t('fundAdded'), 'success')
   } else {
-    const fund = funds.value.find((f) => f.code === editCode.value)
+    const fund = funds.value.find((f) => f.code === result.code)
     if (fund) {
-      fund.cost = editCost.value
-      fund.shares = editShares.value
-      fund.buyDate = editBuyDate.value || undefined
+      fund.cost = result.cost
+      fund.shares = result.shares
+      fund.buyDate = result.buyDate || undefined
     }
     toastRef.value?.show(t('positionUpdated'), 'success')
   }
   saveFunds()
-  showEditModal.value = false
-}
-
-const cancelEdit = () => {
-  showEditModal.value = false
 }
 
 // 选中的行（多选）
@@ -603,36 +585,7 @@ onUnmounted(() => {
 
     <Confirm ref="confirmRef" />
     <Toast ref="toastRef" />
-
-    <!-- 添加/编辑持仓弹窗 -->
-    <Teleport to="body">
-      <div v-if="showEditModal" class="edit-overlay" @click.self="cancelEdit">
-        <div class="edit-modal">
-          <div class="edit-header">
-            <span class="edit-cancel" @click="cancelEdit">❌</span>
-            <span class="edit-title">{{
-              editIsNew ? t('addFundPosition') : t('editFundPosition')
-            }}</span>
-            <span class="edit-confirm" @click="confirmEdit">✅</span>
-          </div>
-          <div class="edit-body">
-            <div class="edit-name">{{ editName }}</div>
-            <div class="edit-row">
-              <label>{{ t('fundCostNav') }}</label>
-              <input v-model.number="editCost" type="number" step="0.0001" class="edit-input" />
-            </div>
-            <div class="edit-row">
-              <label>{{ t('fundShares') }}</label>
-              <input v-model.number="editShares" type="number" step="100" class="edit-input" />
-            </div>
-            <div class="edit-row">
-              <label>{{ t('fundBuyDate') }}</label>
-              <input v-model="editBuyDate" type="date" class="edit-input date-input" />
-            </div>
-          </div>
-        </div>
-      </div>
-    </Teleport>
+    <FundEditModal ref="fundEditRef" />
   </div>
 </template>
 
@@ -959,117 +912,5 @@ onUnmounted(() => {
   opacity: 1;
   transform: scale(1.2);
   filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
-}
-
-/* 编辑持仓弹窗 */
-.edit-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-  animation: editFadeIn 0.2s ease-out;
-}
-.edit-modal {
-  background-color: #1a1c26;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  width: 220px;
-  padding: 8px 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
-  animation: editSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.edit-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 13px;
-  font-weight: bold;
-  padding-bottom: 8px;
-  color: #fff;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-.edit-title {
-  flex: 1;
-  text-align: center;
-}
-.edit-cancel,
-.edit-confirm {
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background-color 0.2s;
-  font-size: 14px;
-}
-.edit-cancel:hover,
-.edit-confirm:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-.edit-body {
-  padding-top: 8px;
-}
-.edit-name {
-  font-size: 12px;
-  color: #aaa;
-  text-align: center;
-  margin-bottom: 8px;
-}
-.edit-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-.edit-row label {
-  font-size: 11px;
-  color: #ccc;
-}
-.edit-input {
-  width: 100px;
-  padding: 4px 6px;
-  font-size: 12px;
-  border-radius: 6px;
-  border: 1px solid #3a3d4a;
-  background-color: #2f3241;
-  color: white;
-  outline: none;
-  text-align: right;
-}
-.edit-input::-webkit-outer-spin-button,
-.edit-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-.edit-input[type='number'] {
-  appearance: textfield;
-  -moz-appearance: textfield;
-}
-.date-input {
-  font-size: 11px;
-  color-scheme: dark;
-}
-
-@keyframes editSlideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-@keyframes editFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 </style>

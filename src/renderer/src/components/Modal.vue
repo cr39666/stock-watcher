@@ -274,6 +274,9 @@ defineExpose({ open })
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   width: 210px; /* Shrunk from 260px */
+  max-height: 96vh;
+  display: flex;
+  flex-direction: column;
   padding: 8px 12px; /* Shrunk from 16px */
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
   animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -289,6 +292,7 @@ defineExpose({ open })
   margin-bottom: 10px;
   color: #fff;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .modal-btn {
@@ -300,6 +304,26 @@ defineExpose({ open })
   align-items: center;
   justify-content: center;
   line-height: 1;
+}
+
+.modal-body {
+  padding-right: 6px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.modal-body::-webkit-scrollbar {
+  width: 4px;
+}
+.modal-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+.modal-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+.modal-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
 .modal-btn:hover {
