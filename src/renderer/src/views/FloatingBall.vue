@@ -32,6 +32,7 @@ const ballDisplayMode = ref('stock')
 const isHovered = ref(false)
 const isContextMenuOpen = ref(false)
 let pnlTimer: ReturnType<typeof setInterval> | null = null
+let goldTimer: ReturnType<typeof setInterval> | null = null
 
 const getTodayStr = () => {
   const d = new Date()
@@ -55,7 +56,7 @@ const fetchAndRefreshPnl = () => {
   if (ballDisplayMode.value === 'none') return
 
   if (ballDisplayMode.value === 'gold') {
-    fetchGoldPrice()
+    // 金价模式不在此处刷新，由独立的 goldTimer 定时刷新
     return
   }
 
@@ -232,13 +233,35 @@ const onMouseDown = (e: MouseEvent) => {
 onMounted(() => {
   // 初始收缩为 80x80
   window.electron.ipcRenderer.send('resize-window', 80, 80)
+  
+  // 初始化显示模式并启动相应的定时器
   fetchAndRefreshPnl()
   pnlTimer = setInterval(fetchAndRefreshPnl, 1000)
+  
+  // 如果初始模式是金价，启动金价定时器
+  if (ballDisplayMode.value === 'gold') {
+    fetchGoldPrice()
+    goldTimer = setInterval(fetchGoldPrice, 10000)
+  }
 
   // 监听右键菜单切换显示模式
   window.electron.ipcRenderer.on('set-ball-display-mode', (_event, mode: string) => {
     ballDisplayMode.value = mode
     localStorage.setItem('ball_display_mode', mode)
+    
+    // 切换到金价模式时，立即刷新一次并启动独立定时器
+    if (mode === 'gold') {
+      fetchGoldPrice()
+      if (goldTimer) clearInterval(goldTimer)
+      goldTimer = setInterval(fetchGoldPrice, 10000)
+    } else {
+      // 切换到非金价模式时，清除金价定时器
+      if (goldTimer) {
+        clearInterval(goldTimer)
+        goldTimer = null
+      }
+    }
+    
     fetchAndRefreshPnl()
   })
 
@@ -249,6 +272,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (pnlTimer) clearInterval(pnlTimer)
+  if (goldTimer) clearInterval(goldTimer)
   window.electron.ipcRenderer.removeAllListeners('set-ball-display-mode')
   window.electron.ipcRenderer.removeAllListeners('ball-context-menu-closed')
 })
