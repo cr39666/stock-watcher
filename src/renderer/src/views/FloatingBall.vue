@@ -29,6 +29,8 @@ const hasStocks = ref(false)
 const goldPrice = ref(0)
 // 悬浮球显示模式：'stock'=股票盈亏, 'gold'=黄金实时价, 'none'=不显示
 const ballDisplayMode = ref('stock')
+const isHovered = ref(false)
+const isContextMenuOpen = ref(false)
 let pnlTimer: ReturnType<typeof setInterval> | null = null
 
 const getTodayStr = () => {
@@ -179,6 +181,10 @@ const pnlColorClass = computed(() => {
   return 'pnl-gray'
 })
 
+const isHoverActive = computed(() => {
+  return isHovered.value && !isContextMenuOpen.value
+})
+
 // 用 rAF 节流，只在每帧提交一次 IPC，避免 mousemove 洪泛导致延迟
 let rafId: number | null = null
 let latestScreenX = 0
@@ -235,11 +241,16 @@ onMounted(() => {
     localStorage.setItem('ball_display_mode', mode)
     fetchAndRefreshPnl()
   })
+
+  window.electron.ipcRenderer.on('ball-context-menu-closed', () => {
+    isContextMenuOpen.value = false
+  })
 })
 
 onUnmounted(() => {
   if (pnlTimer) clearInterval(pnlTimer)
   window.electron.ipcRenderer.removeAllListeners('set-ball-display-mode')
+  window.electron.ipcRenderer.removeAllListeners('ball-context-menu-closed')
 })
 
 const goToDetail = () => {
@@ -248,17 +259,29 @@ const goToDetail = () => {
   router.push(getLastMainView())
 }
 
+const onMouseEnter = () => {
+  isHovered.value = true
+}
+
+const onMouseLeave = () => {
+  isHovered.value = false
+}
+
 const onContextMenu = (e: MouseEvent) => {
   e.preventDefault()
-  window.electron.ipcRenderer.send('show-ball-context-menu')
+  isContextMenuOpen.value = true
+  isHovered.value = false
+  window.electron.ipcRenderer.send('show-ball-context-menu', ballDisplayMode.value)
 }
 </script>
 
 <template>
   <div
     ref="containerRef"
-    class="floating-ball-container"
+    :class="['floating-ball-container', { 'is-hovered': isHoverActive }]"
     @mousedown="onMouseDown"
+    @mouseenter="onMouseEnter"
+    @mouseleave="onMouseLeave"
     @click="goToDetail"
     @contextmenu="onContextMenu"
     :title="t('dragToMove')"
@@ -298,7 +321,7 @@ const onContextMenu = (e: MouseEvent) => {
   will-change: transform, opacity, filter;
 }
 
-.floating-ball-container:hover .ball-icon {
+.floating-ball-container.is-hovered .ball-icon {
   opacity: 1;
   animation-duration: 2s;
   filter: drop-shadow(0 0 8px #6988e6aa);
@@ -320,7 +343,7 @@ const onContextMenu = (e: MouseEvent) => {
   transition: opacity 0.35s ease;
 }
 
-.floating-ball-container:hover .pnl-text {
+.floating-ball-container.is-hovered .pnl-text {
   opacity: 0.4;
 }
 

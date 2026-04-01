@@ -277,7 +277,7 @@ app.whenReady().then(() => {
     createTray()
   })
 
-  ipcMain.on('show-ball-context-menu', (event) => {
+  ipcMain.on('show-ball-context-menu', (event, currentMode: string = 'stock') => {
     const texts = ballMenuTexts[currentLang] || ballMenuTexts['default']
     const menu = Menu.buildFromTemplate([
       {
@@ -286,7 +286,7 @@ app.whenReady().then(() => {
           {
             label: texts.modeStock,
             type: 'radio',
-            checked: true,
+            checked: currentMode === 'stock',
             click: () => {
               mainWindow?.webContents.send('set-ball-display-mode', 'stock')
             }
@@ -294,6 +294,7 @@ app.whenReady().then(() => {
           {
             label: texts.modeGold,
             type: 'radio',
+            checked: currentMode === 'gold',
             click: () => {
               mainWindow?.webContents.send('set-ball-display-mode', 'gold')
             }
@@ -301,6 +302,7 @@ app.whenReady().then(() => {
           {
             label: texts.modeNone,
             type: 'radio',
+            checked: currentMode === 'none',
             click: () => {
               mainWindow?.webContents.send('set-ball-display-mode', 'none')
             }
@@ -317,7 +319,12 @@ app.whenReady().then(() => {
     ])
     const browserWindow = BrowserWindow.fromWebContents(event.sender)
     if (browserWindow) {
-      menu.popup({ window: browserWindow })
+      menu.popup({
+        window: browserWindow,
+        callback: () => {
+          browserWindow.webContents.send('ball-context-menu-closed')
+        }
+      })
     }
   })
 
