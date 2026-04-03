@@ -273,8 +273,8 @@ const goToFund = () => {
   router.push('/fund')
 }
 
-// 是否显示基金按钮
-const showFund = ref(false)
+// 显示导航模块
+const visibleModules = ref<string[]>(['stock', 'gold', 'fund'])
 
 const goToBall = () => {
   window.electron.ipcRenderer.send('resize-window', 60, 60)
@@ -286,9 +286,24 @@ const goToSetting = () => {
 }
 
 onMounted(async () => {
-  // 加载基金显示配置
-  const fundSaved = localStorage.getItem('show_fund')
-  showFund.value = fundSaved !== null ? JSON.parse(fundSaved) : false
+  // 加载显示模块导航配置
+  const moduleSaved = localStorage.getItem('show_modules')
+  if (moduleSaved !== null) {
+    try {
+      const parsed = JSON.parse(moduleSaved)
+      if (Array.isArray(parsed)) {
+        visibleModules.value = parsed
+      } else if (typeof parsed === 'boolean') {
+        visibleModules.value = parsed ? ['stock', 'gold', 'fund'] : []
+      }
+    } catch { /* ignore */ }
+  } else {
+    const fundSaved = localStorage.getItem('show_fund')
+    if (fundSaved !== null) {
+      const parsed = JSON.parse(fundSaved)
+      visibleModules.value = parsed ? ['stock', 'gold', 'fund'] : []
+    }
+  }
 
   loadGoldHolding()
   fetchPrices()
@@ -407,10 +422,10 @@ onUnmounted(() => {
 
     <div class="gold-footer">
       <div class="footer-left">
-        <button class="switch-btn" @click="goToStockList" :title="t('switchToStock')">
+        <button v-if="visibleModules.includes('stock')" class="switch-btn stock-btn" @click="goToStockList" :title="t('switchToStock')">
           📈
         </button>
-        <button v-if="showFund" class="switch-btn fund-btn" @click="goToFund" :title="t('switchToFund')">
+        <button v-if="visibleModules.includes('fund')" class="switch-btn fund-btn" @click="goToFund" :title="t('switchToFund')">
           💹
         </button>
         <button

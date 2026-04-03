@@ -390,7 +390,29 @@ const goToGold = () => {
   router.push('/gold')
 }
 
+// 显示导航模块
+const visibleModules = ref<string[]>(['stock', 'gold', 'fund'])
+
 onMounted(async () => {
+  // 加载显示模块导航配置
+  const moduleSaved = localStorage.getItem('show_modules')
+  if (moduleSaved !== null) {
+    try {
+      const parsed = JSON.parse(moduleSaved)
+      if (Array.isArray(parsed)) {
+        visibleModules.value = parsed
+      } else if (typeof parsed === 'boolean') {
+        visibleModules.value = parsed ? ['stock', 'gold', 'fund'] : []
+      }
+    } catch { /* ignore */ }
+  } else {
+    const fundSaved = localStorage.getItem('show_fund')
+    if (fundSaved !== null) {
+      const parsed = JSON.parse(fundSaved)
+      visibleModules.value = parsed ? ['stock', 'gold', 'fund'] : []
+    }
+  }
+
   loadFunds()
   fetchAllQuotes(true)
   timer = setInterval(() => fetchAllQuotes(false), 3000)
@@ -545,10 +567,10 @@ onUnmounted(() => {
 
     <div class="summary-section">
       <div class="bottom-actions">
-        <button class="mode-btn stock-btn" @click="goToStock" :title="t('switchToStock')">
+        <button v-if="visibleModules.includes('stock')" class="mode-btn stock-btn" @click="goToStock" :title="t('switchToStock')">
           <span class="mode-icon">📈</span>
         </button>
-        <button class="mode-btn gold-btn" @click="goToGold" :title="t('switchToGold')">
+        <button v-if="visibleModules.includes('gold')" class="mode-btn gold-btn" @click="goToGold" :title="t('switchToGold')">
           <span class="mode-icon">🟨</span>
         </button>
         <div class="input-group">

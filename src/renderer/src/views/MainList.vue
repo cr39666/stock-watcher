@@ -59,8 +59,8 @@ const goToFund = () => {
   router.push('/fund')
 }
 
-// 是否显示基金按钮
-const showFund = ref(false)
+// 显示导航模块
+const visibleModules = ref<string[]>(['stock', 'gold', 'fund'])
 
 // Qty 列的展示模式：0=持仓手数, 1=价格提醒
 const qtyDisplayMode = ref(0)
@@ -731,9 +731,24 @@ onMounted(async () => {
   loadStocks()
   resetDailyRealizedPnl() // 跨日清零当日已实现盈亏
 
-  // 加载基金显示配置
-  const fundSaved = localStorage.getItem('show_fund')
-  showFund.value = fundSaved !== null ? JSON.parse(fundSaved) : false
+  // 加载显示模块导航配置
+  const moduleSaved = localStorage.getItem('show_modules')
+  if (moduleSaved !== null) {
+    try {
+      const parsed = JSON.parse(moduleSaved)
+      if (Array.isArray(parsed)) {
+        visibleModules.value = parsed
+      } else if (typeof parsed === 'boolean') {
+        visibleModules.value = parsed ? ['stock', 'gold', 'fund'] : []
+      }
+    } catch { /* ignore */ }
+  } else {
+    const fundSaved = localStorage.getItem('show_fund')
+    if (fundSaved !== null) {
+      const parsed = JSON.parse(fundSaved)
+      visibleModules.value = parsed ? ['stock', 'gold', 'fund'] : []
+    }
+  }
   loadCachedQuotes() // 先加载缓存的行情数据，避免空白
   loadSortState() // 加载排序状态
   fetchQuotes(true) // 初始强制获取一次，不论是否在交易时间
@@ -925,10 +940,10 @@ onUnmounted(() => {
 
     <div class="summary-section">
       <div class="bottom-actions">
-        <button class="mode-btn" @click="goToGold" :title="t('switchToGold')">
+        <button v-if="visibleModules.includes('gold')" class="mode-btn" @click="goToGold" :title="t('switchToGold')">
           <span class="mode-icon">🟨</span>
         </button>
-        <button v-if="showFund" class="mode-btn fund-btn" @click="goToFund" :title="t('switchToFund')">
+        <button v-if="visibleModules.includes('fund')" class="mode-btn fund-btn" @click="goToFund" :title="t('switchToFund')">
           <span class="mode-icon">💹</span>
         </button>
         <div class="input-group">

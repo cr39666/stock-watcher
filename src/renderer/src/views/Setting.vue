@@ -3,7 +3,7 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import DragHandle from '../components/DragHandle.vue'
-import ToggleSwitch from '../components/ToggleSwitch.vue'
+import Toast from '../components/Toast.vue'
 import { getLastMainView } from '../router'
 
 const { t, locale } = useI18n()
@@ -13,6 +13,7 @@ import pkg from '../../../../package.json'
 const version = pkg.version
 
 const containerRef = ref<HTMLElement | null>(null)
+const toastRef = ref<InstanceType<typeof Toast> | null>(null)
 let resizeObserver: ResizeObserver | null = null
 
 const ballAlwaysOnTop = ref(true)
@@ -123,10 +124,19 @@ const changeBallDisplayMode = (mode: string) => {
   localStorage.setItem('ball_display_mode', mode)
 }
 
-const showFund = ref(false)
-const toggleShowFund = () => {
-  showFund.value = !showFund.value
-  localStorage.setItem('show_fund', JSON.stringify(showFund.value))
+const showModules = ref<string[]>(['stock', 'gold', 'fund'])
+const toggleModule = (module: string) => {
+  if (showModules.value.includes(module)) {
+    // 限制至少选中一个
+    if (showModules.value.length <= 1) {
+      toastRef.value?.show(t('selectionRequired'), 'warn')
+      return
+    }
+    showModules.value = showModules.value.filter(m => m !== module)
+  } else {
+    showModules.value.push(module)
+  }
+  localStorage.setItem('show_modules', JSON.stringify(showModules.value))
 }
 
 const goBack = () => {
@@ -157,9 +167,23 @@ onMounted(async () => {
   if (modeSaved !== null) {
     ballDisplayMode.value = modeSaved
   }
-  const fundSaved = localStorage.getItem('show_fund')
-  if (fundSaved !== null) {
-    showFund.value = JSON.parse(fundSaved)
+  const moduleSaved = localStorage.getItem('show_modules')
+  if (moduleSaved !== null) {
+    try {
+      const parsed = JSON.parse(moduleSaved)
+      if (Array.isArray(parsed)) {
+        showModules.value = parsed
+      } else if (typeof parsed === 'boolean') {
+        showModules.value = parsed ? ['stock', 'gold', 'fund'] : []
+      }
+    } catch { /* ignore */ }
+  } else {
+    // fallback to old key
+    const fundSaved = localStorage.getItem('show_fund')
+    if (fundSaved !== null) {
+      const parsed = JSON.parse(fundSaved)
+      showModules.value = parsed ? ['stock', 'gold', 'fund'] : []
+    }
   }
   const hotkeySaved = localStorage.getItem('global_hotkey')
   if (hotkeySaved !== null) {
@@ -222,12 +246,12 @@ onUnmounted(() => {
         </div>
       </div>
       <div class="setting-item">
-        <span class="label">{{ t('ballAlwaysOnTop') }}</span>
-        <ToggleSwitch :active="ballAlwaysOnTop" @toggle="toggleBallAlwaysOnTop" />
-      </div>
-      <div class="setting-item">
-        <span class="label">{{ t('windowAlwaysOnTop') }}</span>
-        <ToggleSwitch :active="windowAlwaysOnTop" @toggle="toggleWindowAlwaysOnTop" />
+        <span class="label">{{ t('alwaysOnTop') }}</span>
+        <div class="lang-select">
+          <span class="lang-option" :class="{ active: ballAlwaysOnTop }" @click="toggleBallAlwaysOnTop">{{ t('topBall') }}</span>
+          <span class="lang-divider">|</span>
+          <span class="lang-option" :class="{ active: windowAlwaysOnTop }" @click="toggleWindowAlwaysOnTop">{{ t('topWindow') }}</span>
+        </div>
       </div>
       <div class="setting-item">
         <span class="label">{{ t('ballDisplayMode') }}</span>
@@ -240,8 +264,14 @@ onUnmounted(() => {
         </div>
       </div>
       <div class="setting-item">
-        <span class="label">{{ t('showFund') }}</span>
-        <ToggleSwitch :active="showFund" @toggle="toggleShowFund" />
+        <span class="label">{{ t('showModules') }}</span>
+        <div class="lang-select">
+          <span class="lang-option" :class="{ active: showModules.includes('stock') }" @click="toggleModule('stock')">{{ t('moduleStock') }}</span>
+          <span class="lang-divider">|</span>
+          <span class="lang-option" :class="{ active: showModules.includes('gold') }" @click="toggleModule('gold')">{{ t('moduleGold') }}</span>
+          <span class="lang-divider">|</span>
+          <span class="lang-option" :class="{ active: showModules.includes('fund') }" @click="toggleModule('fund')">{{ t('moduleFund') }}</span>
+        </div>
       </div>
       <div class="setting-item hotkey-item">
         <span class="label">{{ t('hotkeyLabel') }}</span>
@@ -259,6 +289,7 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+    <Toast ref="toastRef" />
   </div>
 </template>
 
@@ -387,8 +418,7 @@ onUnmounted(() => {
 .version-item {
   cursor: pointer;
   transition: opacity 0.2s;
-  padding-top: 8px;
-  margin-top: 4px;
+  padding-top: 6px;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
