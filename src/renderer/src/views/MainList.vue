@@ -309,7 +309,7 @@ const addStock = async () => {
   const quote = quotes.value[code]
   const defaultPrice = quote?.currentPrice || 0
 
-  const res = await modalRef.value?.open('add', t('addPosition'), '', {
+  const res = await modalRef.value?.open('add', t('addPosition'), quote?.name || code, {
     price: defaultPrice,
     amount: 1
   })

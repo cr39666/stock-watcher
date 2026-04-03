@@ -176,6 +176,8 @@ defineExpose({ open })
 
             <!-- 添加/交易模式 -->
             <template v-else>
+              <!-- 添加模式：显示股票名称 -->
+              <div v-if="modalType === 'add' && modalMessage" class="modal-stock-name">{{ modalMessage }}</div>
               <!-- 调仓模式：先选方向 -->
               <div v-if="modalType === 'transaction'" class="trade-direction-group">
                 <button
@@ -236,7 +238,7 @@ defineExpose({ open })
             <transition name="hint-fade">
               <p v-if="shakeHint" class="modal-hint">{{ shakeHint }}</p>
             </transition>
-            <p v-if="modalMessage" class="modal-msg">
+            <p v-if="modalMessage && modalType !== 'add'" class="modal-msg">
               <template v-if="modalType === 'alert' && parsedMessage.currentPrice !== null">
                 {{ parsedMessage.stockName }} ({{ parsedMessage.currentPriceText }}:
                 <span :class="['current-price', isPriceUp === true ? 'price-up' : isPriceUp === false ? 'price-down' : '']">
@@ -377,6 +379,13 @@ defineExpose({ open })
 .modal-input-group label {
   font-size: 11px;
   color: #888;
+}
+
+.modal-stock-name {
+  font-size: 12px;
+  color: #aaa;
+  text-align: center;
+  margin-bottom: 2px;
 }
 
 .modal-input {
@@ -556,7 +565,6 @@ defineExpose({ open })
 .modal-checkbox-group {
   display: flex;
   align-items: center;
-  margin-top: 4px;
 }
 
 .checkbox-label {
