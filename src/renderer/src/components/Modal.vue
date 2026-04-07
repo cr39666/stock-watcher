@@ -268,7 +268,7 @@ defineExpose({ open })
   align-items: center;
   justify-content: center;
   z-index: 9999;
-  animation: modalFadeIn 0.2s ease-out;
+  animation: modalFadeIn 0.2s ease-out forwards;
 }
 
 .modal-content {
@@ -281,7 +281,8 @@ defineExpose({ open })
   flex-direction: column;
   padding: 8px 12px; /* Shrunk from 16px */
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
-  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: modalSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
 }
 
 .modal-header {

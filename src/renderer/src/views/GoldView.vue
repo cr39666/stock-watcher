@@ -580,7 +580,8 @@ onUnmounted(() => {
 
 .metal-card-body {
   padding: 0 8px 8px 8px;
-  animation: slideDown 0.3s ease-out;
+  animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
 }
 
 @keyframes slideDown {
