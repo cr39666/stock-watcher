@@ -664,7 +664,6 @@ onUnmounted(() => {
 
 .table-container {
   flex: 1;
-  overflow-y: auto;
 }
 
 .fund-table {

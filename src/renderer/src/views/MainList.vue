@@ -1166,7 +1166,6 @@ onUnmounted(() => {
 
 .table-container {
   flex: 1;
-  overflow-y: auto;
 }
 
 .stock-table {
