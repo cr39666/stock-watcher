@@ -68,12 +68,6 @@ const toggleQtyDisplayMode = () => {
   qtyDisplayMode.value = (qtyDisplayMode.value + 1) % 2
 }
 
-// Name 列的展示模式：0=仅名称, 1=仅代码
-const nameDisplayMode = ref(0)
-const toggleNameDisplayMode = () => {
-  nameDisplayMode.value = (nameDisplayMode.value + 1) % 2
-}
-
 // 排序状态（持久化）
 const sortColumn = ref<string | null>(null)
 const sortOrder = ref<'asc' | 'desc' | 'none'>('none')
@@ -142,6 +136,12 @@ const displayStocks = computed(() => {
           valA = qA?.changePercent || 0
           valB = qB?.changePercent || 0
           break
+        case 'name': {
+          const nameA = qA?.name || a.code
+          const nameB = qB?.name || b.code
+          const cmp = nameA.localeCompare(nameB, 'zh-CN')
+          return sortOrder.value === 'asc' ? cmp : -cmp
+        }
       }
       return sortOrder.value === 'asc' ? valA - valB : valB - valA
     })
@@ -159,6 +159,16 @@ const displayStocks = computed(() => {
 const isCensored = ref(false)
 const toggleCensor = () => {
   isCensored.value = !isCensored.value
+}
+
+// Name 这一列单行显示代码还是名称展示的追踪列表
+const shownCodes = ref<string[]>([])
+const toggleNameDisplay = (code: string) => {
+  if (shownCodes.value.includes(code)) {
+    shownCodes.value = shownCodes.value.filter(c => c !== code)
+  } else {
+    shownCodes.value.push(code)
+  }
 }
 
 // Avg 列展示模式：0=均摊成本, 1=持仓市值
@@ -189,14 +199,6 @@ const formatName = (name: string | undefined): string => {
     return name.slice(0, 3) + '...'
   }
   return name
-}
-
-// 复制价格到剪贴板
-const copyPrice = (price: number | undefined) => {
-  if (!price) return
-  navigator.clipboard.writeText(price.toString()).then(() => {
-    toastRef.value?.show(t('priceCopied'), 'success')
-  })
 }
 
 // 复制盈亏到剪贴板
@@ -806,12 +808,11 @@ onUnmounted(() => {
       <table class="stock-table">
         <thead>
           <tr>
-            <th
-              :title="nameDisplayMode === 0 ? t('name') : t('code')"
-              @click="toggleNameDisplayMode"
-              class="clickable-th"
-            >
-              {{ nameDisplayMode === 0 ? 'Name' : 'Code' }} <span class="toggle-icon">🔁</span>
+            <th :title="t('name')" @click="toggleSort('name')" class="clickable-th">
+              Name
+              <span class="sort-icon">{{
+                sortColumn === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
+              }}</span>
             </th>
             <th :title="t('currentPrice')" @click="toggleSort('curPrice')" class="clickable-th">
               Price
@@ -856,23 +857,21 @@ onUnmounted(() => {
             :class="{ 'row-selected': selectedCodes.includes(stock.code) }"
             @click="toggleRowSelection(stock.code)"
           >
-            <td :class="['name-cell', quotes[stock.code]?.changeAmount >= 0 ? 'red' : 'green']" :title="quotes[stock.code]?.name || stock.code">
+            <td :class="['name-cell', (quotes[stock.code]?.changeAmount || 0) >= 0 ? 'red' : 'green']" :title="quotes[stock.code]?.name || stock.code" @click.stop="toggleNameDisplay(stock.code)">
               <template v-if="!isCensored">
-                <div v-if="nameDisplayMode === 0">{{ formatName(quotes[stock.code]?.name) }}</div>
-                <div v-else>{{ stock.code }}</div>
+                <div class="clickable-tag">
+                  <span v-if="!shownCodes.includes(stock.code)">{{ formatName(quotes[stock.code]?.name) }}</span>
+                  <span v-else>{{ stock.code }}</span>
+                </div>
               </template>
               <template v-else>
-                <div>❇❇</div>
+                <div class="clickable-tag">❇❇</div>
               </template>
             </td>
-            <td
-              :class="['price-cell', quotes[stock.code]?.changeAmount >= 0 ? 'red' : 'green']"
-              @click.stop="copyPrice(quotes[stock.code]?.currentPrice)"
-              :title="t('clickToCopy')"
-            >
-              <div v-if="!isCensored" class="clickable-tag">
+            <td :class="[(quotes[stock.code]?.changeAmount || 0) >= 0 ? 'red' : 'green']">
+              <template v-if="!isCensored">
                 {{ quotes[stock.code]?.currentPrice?.toFixed(2) || '--' }}
-              </div>
+              </template>
               <span v-else>❇❇</span>
             </td>
             <td :class="calculateDailyPnl(stock) >= 0 ? 'red' : 'green'">
@@ -1157,15 +1156,16 @@ onUnmounted(() => {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  border-bottom: 1px solid #3a3d4a;
 }
 
 .stock-table th,
 .stock-table td {
   padding: 1px 4px; /* Further reduced padding for compact look */
-  border-bottom: 1px solid #3a3d4a;
 }
 
 .stock-table th {
+  border-bottom: 1px solid #3a3d4a;
   text-align: center;
   color: #aaa;
   font-size: 11px; /* Slightly smaller font for headers */
@@ -1427,29 +1427,35 @@ onUnmounted(() => {
   cursor: default;
 }
 
+.stock-table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
+
 .stock-table tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .row-selected {
   background-color: rgba(46, 204, 113, 0.1) !important;
-  box-shadow: inset 2px 0 0 var(--ev-c-green);
   border-radius: 6px;
 }
 
 .clickable-tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0 4px;
-  line-height: 16px;
+  height: 18px;
   background-color: rgba(255, 255, 255, 0.06);
   border-radius: 4px;
   min-width: 22px;
-  text-align: center;
   transition: all 0.2s;
   border: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
 }
 
 .clickable-tag:hover {
+  cursor: pointer;
   background-color: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);

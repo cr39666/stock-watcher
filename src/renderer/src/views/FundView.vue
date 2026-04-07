@@ -91,10 +91,14 @@ const toggleRowSelection = (code: string) => {
   }
 }
 
-// Name 列展示模式：0=名称, 1=代码
-const nameDisplayMode = ref(0)
-const toggleNameDisplayMode = () => {
-  nameDisplayMode.value = (nameDisplayMode.value + 1) % 2
+// Name 这一列单行显示代码还是名称展示的追踪列表
+const shownCodes = ref<string[]>([])
+const toggleNameDisplay = (code: string) => {
+  if (shownCodes.value.includes(code)) {
+    shownCodes.value = shownCodes.value.filter(c => c !== code)
+  } else {
+    shownCodes.value.push(code)
+  }
 }
 
 const formatName = (name: string | undefined): string => {
@@ -293,13 +297,7 @@ const totalPnl = computed(() => {
   }, 0)
 })
 
-// 复制价格
-const copyPrice = (price: number | undefined) => {
-  if (!price) return
-  navigator.clipboard.writeText(price.toString()).then(() => {
-    toastRef.value?.show(t('priceCopied'), 'success')
-  })
-}
+// 删除不必要的复制盈亏到剪贴板函数
 
 // 复制总盈亏到剪贴板
 const copyTotalPnl = () => {
@@ -351,6 +349,12 @@ const displayFunds = computed(() => {
           valA = calculateYield(a) ?? -999999999
           valB = calculateYield(b) ?? -999999999
           break
+        case 'name': {
+          const nameA = quotes.value[a.code]?.name || a.code
+          const nameB = quotes.value[b.code]?.name || b.code
+          const cmp = nameA.localeCompare(nameB, 'zh-CN')
+          return sortOrder.value === 'asc' ? cmp : -cmp
+        }
       }
       return sortOrder.value === 'asc' ? valA - valB : valB - valA
     })
@@ -452,12 +456,11 @@ onUnmounted(() => {
       <table class="fund-table">
         <thead>
           <tr>
-            <th
-              :title="nameDisplayMode === 0 ? t('name') : t('code')"
-              @click="toggleNameDisplayMode"
-              class="clickable-th"
-            >
-              {{ nameDisplayMode === 0 ? 'Name' : 'Code' }} <span class="toggle-icon">🔁</span>
+            <th :title="t('name')" @click="toggleSort('name')" class="clickable-th">
+              Name
+              <span class="sort-icon">{{
+                sortColumn === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
+              }}</span>
             </th>
             <th :title="t('fundNav')" @click="toggleSort('nav')" class="clickable-th">
               NAV
@@ -499,21 +502,19 @@ onUnmounted(() => {
             :class="{ 'row-selected': selectedCodes.includes(fund.code) }"
             @click="toggleRowSelection(fund.code)"
           >
-            <td :class="['name-cell', (quotes[fund.code]?.dayGrowth || 0) >= 0 ? 'red' : 'green']" :title="quotes[fund.code]?.name || fund.code">
+            <td :class="['name-cell', (quotes[fund.code]?.dayGrowth || 0) >= 0 ? 'red' : 'green']" :title="quotes[fund.code]?.name || fund.code" @click.stop="toggleNameDisplay(fund.code)">
               <template v-if="!isCensored">
-                <div v-if="nameDisplayMode === 0">{{ formatName(quotes[fund.code]?.name) }}</div>
-                <div v-else>{{ fund.code }}</div>
+                <div class="clickable-tag">
+                  <span v-if="!shownCodes.includes(fund.code)">{{ formatName(quotes[fund.code]?.name) }}</span>
+                  <span v-else>{{ fund.code }}</span>
+                </div>
               </template>
-              <template v-else><div>❇❇</div></template>
+              <template v-else><div class="clickable-tag">❇❇</div></template>
             </td>
-            <td
-              :class="['price-cell', (quotes[fund.code]?.dayGrowth || 0) >= 0 ? 'red' : 'green']"
-              @click.stop="copyPrice(quotes[fund.code]?.nav)"
-              :title="t('clickToCopy')"
-            >
-              <div v-if="!isCensored" class="clickable-tag">
+            <td :class="[(quotes[fund.code]?.dayGrowth || 0) >= 0 ? 'red' : 'green']">
+              <template v-if="!isCensored">
                 {{ quotes[fund.code]?.nav?.toFixed(4) || '--' }}
-              </div>
+              </template>
               <span v-else>❇❇</span>
             </td>
             <td
@@ -670,13 +671,14 @@ onUnmounted(() => {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  border-bottom: 1px solid #3a3d4a;
 }
 .fund-table th,
 .fund-table td {
   padding: 1px 4px;
-  border-bottom: 1px solid #3a3d4a;
 }
 .fund-table th {
+  border-bottom: 1px solid #3a3d4a;
   text-align: center;
   color: #aaa;
   font-size: 11px;
@@ -735,17 +737,20 @@ onUnmounted(() => {
 }
 
 .clickable-tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: 0 4px;
-  line-height: 16px;
+  height: 18px;
   background-color: rgba(255, 255, 255, 0.06);
   border-radius: 4px;
   min-width: 22px;
-  text-align: center;
   transition: all 0.2s;
   border: 1px solid rgba(255, 255, 255, 0.04);
+  vertical-align: middle;
 }
 .clickable-tag:hover {
+  cursor: pointer;
   background-color: rgba(255, 255, 255, 0.12);
   border-color: rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
@@ -778,8 +783,11 @@ onUnmounted(() => {
   transition: background-color 0.2s;
   cursor: default;
 }
+.fund-table tbody tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.03);
+}
 .fund-table tbody tr:hover {
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 .empty-row {
