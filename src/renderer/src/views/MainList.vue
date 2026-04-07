@@ -939,11 +939,11 @@ onUnmounted(() => {
 
     <div class="summary-section">
       <div class="bottom-actions">
-        <button v-if="visibleModules.includes('gold')" class="mode-btn" @click="goToGold" :title="t('switchToGold')">
-          <span class="mode-icon">🟨</span>
-        </button>
         <button v-if="visibleModules.includes('fund')" class="mode-btn fund-btn" @click="goToFund" :title="t('switchToFund')">
           <span class="mode-icon">💹</span>
+        </button>
+        <button v-if="visibleModules.includes('gold')" class="mode-btn" @click="goToGold" :title="t('switchToGold')">
+          <span class="mode-icon">🟨</span>
         </button>
         <div class="input-group">
           <input
