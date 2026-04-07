@@ -51,27 +51,27 @@
 ## 📸 产品截图
 
 ### 🪟 窗口大小对比
-![大小](./src/renderer/src/assets/screenshots/window-1.png)
+![大小](./docs/screenshots/window-1.png)
 
 ### 🫧 悬浮球例图
-![悬浮球](./src/renderer/src/assets/screenshots/ball-1.png)
-![悬浮球](./src/renderer/src/assets/screenshots/ball-2.png)
+![悬浮球](./docs/screenshots/ball-1.png)
+![悬浮球](./docs/screenshots/ball-2.png)
 
 ### 📊 股票例图
-![A股](./src/renderer/src/assets/screenshots/stock-1.png)
-![A股](./src/renderer/src/assets/screenshots/stock-2.png)
-![A股](./src/renderer/src/assets/screenshots/stock-3.png)
-![A股](./src/renderer/src/assets/screenshots/stock-4.png)
+![A股](./docs/screenshots/stock-1.png)
+![A股](./docs/screenshots/stock-2.png)
+![A股](./docs/screenshots/stock-3.png)
+![A股](./docs/screenshots/stock-4.png)
 
 ### 💹 基金例图
-![基金](./src/renderer/src/assets/screenshots/fund-1.png)
-![基金](./src/renderer/src/assets/screenshots/fund-2.png)
+![基金](./docs/screenshots/fund-1.png)
+![基金](./docs/screenshots/fund-2.png)
 
 ### 🟨 黄金例图
-![黄金](./src/renderer/src/assets/screenshots/gold-1.png)
+![黄金](./docs/screenshots/gold-1.png)
 
 ### ⚙️ 设置例图
-![设置](./src/renderer/src/assets/screenshots/setting-1.png)
+![设置](./docs/screenshots/setting-1.png)
 
 ---
 
