@@ -582,7 +582,7 @@ onUnmounted(() => {
             class="fund-input"
             ref="fundInputRef"
           />
-          <button class="add-btn" @click="addFund">➕</button>
+          <button class="add-btn" @click="addFund"><span class="add-icon">➕</span></button>
         </div>
       </div>
       <div class="summary-pnl">
@@ -881,8 +881,25 @@ onUnmounted(() => {
   transition: background-color 0.3s;
 }
 .add-btn:hover {
-  background-color: var(--ev-c-green);
-  border-color: var(--ev-c-green);
+  background-color: rgba(46, 204, 113, 0.2);
+  border-color: rgba(46, 204, 113, 0.2);
+}
+
+.add-btn:active {
+  transform: scale(0.95);
+}
+
+.add-icon {
+  font-size: 12px;
+  opacity: 0.8;
+  display: inline-block;
+  transition: opacity 0.25s, transform 0.25s, text-shadow 0.25s;
+}
+
+.add-btn:hover .add-icon {
+  opacity: 1;
+  transform: scale(1.2);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
 }
 
 .summary-pnl {
