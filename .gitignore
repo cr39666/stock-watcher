@@ -31,5 +31,8 @@ Thumbs.db
 *.tmp
 *.temp
 
+# ESLint 缓存
+.eslintcache
+
 # Electron 打包缓存
 out/
