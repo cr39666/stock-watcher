@@ -22,6 +22,12 @@ export default defineConfig(
     }
   },
   {
+    files: ['**/MarkdownRenderer.vue'],
+    rules: {
+      'vue/no-v-html': 'off'
+    }
+  },
+  {
     files: ['**/*.{ts,mts,tsx,vue}'],
     rules: {
       'vue/require-default-prop': 'off',

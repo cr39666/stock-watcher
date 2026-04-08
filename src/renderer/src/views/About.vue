@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import DragHandle from '../components/DragHandle.vue'
+import MarkdownRenderer from '../components/MarkdownRenderer.vue'
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -64,27 +65,6 @@ const dismissUpdate = () => {
 
 const installUpdate = () => {
   window.electron.ipcRenderer.send('quit-and-install')
-}
-
-// 格式化 release notes（Markdown → 结构化数组）
-interface ReleaseNoteLine {
-  type: 'h2' | 'h3' | 'h4' | 'li' | 'p'
-  text: string
-}
-
-const parseReleaseNotes = (notes: string): ReleaseNoteLine[] => {
-  if (!notes) return []
-  return notes
-    .split('\n')
-    .filter((line) => line.trim())
-    .map((line) => {
-      if (line.startsWith('### ')) return { type: 'h4' as const, text: line.slice(4) }
-      if (line.startsWith('## ')) return { type: 'h3' as const, text: line.slice(3) }
-      if (line.startsWith('# ')) return { type: 'h2' as const, text: line.slice(2) }
-      if (line.startsWith('- ') || line.startsWith('* '))
-        return { type: 'li' as const, text: line.slice(2) }
-      return { type: 'p' as const, text: line }
-    })
 }
 
 // 通用窗口尺寸同步：测量容器实际尺寸并通知主进程
@@ -264,19 +244,15 @@ onUnmounted(() => {
       <div v-if="showUpdateDialog" class="release-notes-overlay" @click.self="dismissUpdate">
         <div class="release-notes-modal">
           <div class="release-notes-header">
-            <span class="dismiss-btn" @click="dismissUpdate">✕</span>
+            <span class="dismiss-btn" @click="dismissUpdate">❌️</span>
             <span>{{ t('whatsNew') }} {{ versionInfo ? 'v' + versionInfo : '' }}</span>
             <span class="confirm-btn" :title="t('confirmUpdate')" @click="confirmDownload">✅</span>
           </div>
-          <div v-if="releaseNotes" class="release-notes-content">
-            <template v-for="(line, i) in parseReleaseNotes(releaseNotes)" :key="i">
-              <component :is="'h' + line.type.slice(1)" v-if="line.type.startsWith('h')">
-                {{ line.text }}
-              </component>
-              <li v-else-if="line.type === 'li'">{{ line.text }}</li>
-              <p v-else>{{ line.text }}</p>
-            </template>
-          </div>
+          <MarkdownRenderer
+            v-if="releaseNotes"
+            :content="releaseNotes"
+            class="release-notes-content"
+          />
           <div v-else class="release-notes-content">
             <p class="no-notes">{{ t('newVersionFoundGeneric') }}</p>
           </div>
@@ -520,7 +496,6 @@ onUnmounted(() => {
 .dismiss-btn,
 .confirm-btn {
   cursor: pointer;
-  padding: 4px;
   border-radius: 4px;
   transition: background-color 0.2s;
   display: flex;
@@ -538,43 +513,7 @@ onUnmounted(() => {
   padding: 10px 14px;
   overflow-y: auto;
   font-size: 11px;
-  line-height: 1.6;
   color: rgba(255, 255, 255, 0.85);
-}
-
-.release-notes-content::-webkit-scrollbar {
-  width: 4px;
-}
-
-.release-notes-content::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 2px;
-}
-
-.release-notes-content :deep(h2),
-.release-notes-content :deep(h3),
-.release-notes-content :deep(h4) {
-  margin: 6px 0 3px;
-  color: #2ecc71;
-}
-
-.release-notes-content h2 {
-  font-size: 14px;
-}
-.release-notes-content h3 {
-  font-size: 13px;
-}
-.release-notes-content h4 {
-  font-size: 12px;
-}
-
-.release-notes-content p {
-  margin: 3px 0;
-}
-
-.release-notes-content li {
-  margin: 2px 0 2px 12px;
-  list-style-type: disc;
 }
 
 .no-notes {
