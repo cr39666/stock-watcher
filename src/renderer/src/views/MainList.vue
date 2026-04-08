@@ -345,7 +345,7 @@ const fetchQuotesByCode = (code: string): Promise<void> => {
     script.src = `http://qt.gtimg.cn/q=${code}&t=${Date.now()}`
     script.onload = () => {
       const varName = `v_${code}`
-      const dataStr = (window as Record<string, unknown>)[varName] as string | undefined
+      const dataStr = (window as unknown as Record<string, unknown>)[varName] as string | undefined
       if (dataStr) {
         const parts = dataStr.split('~')
         if (parts.length > 5) {
