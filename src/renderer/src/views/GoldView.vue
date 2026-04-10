@@ -209,10 +209,7 @@ const toggleHoldingDrawer = () => {
 // closeHoldingDrawer removed as expansion is toggled via header
 
 // 处理交易确认
-const handleTradeConfirm = (
-  action: 'buy' | 'sell' | 'init',
-  data: { grams: number; avgPrice?: number }
-) => {
+const handleTradeConfirm = (action: 'buy' | 'sell' | 'init', data: { grams: number; avgPrice?: number }) => {
   // 交易单价优先使用用户输入的值，否则回退到当前市价
   const transactionPrice = data.avgPrice || holdingPricePerGramCNY.value || 0
 
@@ -347,7 +344,9 @@ onUnmounted(() => {
         </button>
       </template>
       <template #right>
-        <button class="nav-btn setting-btn" :title="t('goToSetting')" @click="goToSetting">⚙️<span v-if="hasPendingUpdate" class="update-dot"></span></button>
+        <button class="nav-btn setting-btn" :title="t('goToSetting')" @click="goToSetting">
+          ⚙️<span v-if="hasPendingUpdate" class="update-dot"></span>
+        </button>
       </template>
     </DragHandle>
 
@@ -396,8 +395,7 @@ onUnmounted(() => {
                   :class="{ profit: calculateGoldTotalPnL > 0, loss: calculateGoldTotalPnL < 0 }"
                 >
                   <template v-if="showPnLType === 'value'">
-                    ¥{{ calculateGoldTotalPnL >= 0 ? '+' : ''
-                    }}{{ calculateGoldTotalPnL.toFixed(2) }}
+                    ¥{{ calculateGoldTotalPnL >= 0 ? '+' : '' }}{{ calculateGoldTotalPnL.toFixed(2) }}
                   </template>
                   <template v-else>
                     {{ calculateGoldYield >= 0 ? '+' : '' }}{{ calculateGoldYield.toFixed(2) }}%
@@ -561,8 +559,15 @@ onUnmounted(() => {
 }
 
 @keyframes dotPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.3); }
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.3);
+  }
 }
 
 .nav-icon {

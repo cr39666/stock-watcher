@@ -287,12 +287,7 @@ const addStock = async () => {
 
   // 自动根据6位纯数字代码补齐市场前缀
   if (/^\d{6}$/.test(code)) {
-    if (
-      code.startsWith('6') ||
-      code.startsWith('5') ||
-      code.startsWith('7') ||
-      code.startsWith('9')
-    ) {
+    if (code.startsWith('6') || code.startsWith('5') || code.startsWith('7') || code.startsWith('9')) {
       code = 'sh' + code
     } else if (code.startsWith('0') || code.startsWith('1') || code.startsWith('3')) {
       code = 'sz' + code
@@ -400,12 +395,11 @@ const adjustStockFlow = async (stock: StockItem) => {
 
   // 循环：清仓取消后重新显示调仓确认框
   while (true) {
-    const res = await modalRef.value?.open(
-      'transaction',
-      t('adjustPosition'),
-      quote?.name || stock.code,
-      { price: lastPrice, amount: 0, currentAmount: stock.amount }
-    )
+    const res = await modalRef.value?.open('transaction', t('adjustPosition'), quote?.name || stock.code, {
+      price: lastPrice,
+      amount: 0,
+      currentAmount: stock.amount
+    })
 
     if (!res?.confirmed) return
 
@@ -459,8 +453,7 @@ const adjustStockFlow = async (stock: StockItem) => {
 
       // 当日盈亏修正：加仓部分的当日盈亏应从买入价算起，而非昨收
       if (yesterdayClose > 0) {
-        stock.dailyRealizedPnl =
-          (stock.dailyRealizedPnl || 0) - (tradePrice - yesterdayClose) * delta * 100
+        stock.dailyRealizedPnl = (stock.dailyRealizedPnl || 0) - (tradePrice - yesterdayClose) * delta * 100
       }
     } else {
       // 减仓：将卖出部分的盈亏计入已实现盈亏（永久）
@@ -899,9 +892,7 @@ onUnmounted(() => {
             </td>
             <td :class="(calculateTotalPnl(stock) || 0) >= 0 ? 'red' : 'green'">
               <span v-if="!isCensored">
-                {{
-                  calculateTotalPnl(stock) !== null ? calculateTotalPnl(stock)!.toFixed(1) : '--'
-                }}
+                {{ calculateTotalPnl(stock) !== null ? calculateTotalPnl(stock)!.toFixed(1) : '--' }}
               </span>
               <span v-else>❇❇</span>
             </td>
@@ -923,8 +914,7 @@ onUnmounted(() => {
             <td :class="quotes[stock.code]?.changeAmount >= 0 ? 'red' : 'green'">
               <span v-if="!isCensored">
                 <span v-if="quotes[stock.code]">
-                  {{ quotes[stock.code].changeAmount > 0 ? '+' : ''
-                  }}{{ quotes[stock.code].changePercent }}%
+                  {{ quotes[stock.code].changeAmount > 0 ? '+' : '' }}{{ quotes[stock.code].changePercent }}%
                 </span>
                 <span v-else>--</span>
               </span>
@@ -991,31 +981,21 @@ onUnmounted(() => {
       </div>
       <div class="summary-pnl">
         <span
-          :class="[
-            'visible-summary',
-            totalDailyPnl > 0 ? 'red' : totalDailyPnl < 0 ? 'green' : 'gray'
-          ]"
+          :class="['visible-summary', totalDailyPnl > 0 ? 'red' : totalDailyPnl < 0 ? 'green' : 'gray']"
           :title="t('dailyPnlTotal')"
           @click.stop="copyPnl('daily')"
         >
           <span class="pnl-label">D:</span>
-          <span v-if="!isCensored"
-            >{{ totalDailyPnl > 0 ? '+' : '' }}{{ totalDailyPnl.toFixed(1) }}</span
-          >
+          <span v-if="!isCensored">{{ totalDailyPnl > 0 ? '+' : '' }}{{ totalDailyPnl.toFixed(1) }}</span>
           <span v-else>❇❇</span>
         </span>
         <span
-          :class="[
-            'visible-summary',
-            totalHoldingPnl > 0 ? 'red' : totalHoldingPnl < 0 ? 'green' : 'gray'
-          ]"
+          :class="['visible-summary', totalHoldingPnl > 0 ? 'red' : totalHoldingPnl < 0 ? 'green' : 'gray']"
           :title="t('holdingPnlTotal')"
           @click.stop="copyPnl('total')"
         >
           <span class="pnl-label">H:</span>
-          <span v-if="!isCensored"
-            >{{ totalHoldingPnl > 0 ? '+' : '' }}{{ totalHoldingPnl.toFixed(1) }}</span
-          >
+          <span v-if="!isCensored">{{ totalHoldingPnl > 0 ? '+' : '' }}{{ totalHoldingPnl.toFixed(1) }}</span>
           <span v-else>❇❇</span>
         </span>
         <span class="lock-icon" :title="t('toggleHide')" @click="toggleCensor">{{

@@ -115,9 +115,7 @@ const confirm = () => {
     <div class="modal-content">
       <div class="modal-header">
         <span class="modal-btn" @click="close">❌</span>
-        <span>{{
-          mode === 'buy' ? t('addPos') : mode === 'sell' ? t('reducePos') : t('initHolding')
-        }}</span>
+        <span>{{ mode === 'buy' ? t('addPos') : mode === 'sell' ? t('reducePos') : t('initHolding') }}</span>
         <span class="modal-btn" @click="confirm">✔️</span>
       </div>
 

@@ -75,7 +75,6 @@ const syncWindowSize = () => {
   window.electron.ipcRenderer.send('resize-window', width, height)
 }
 
-
 onMounted(async () => {
   // 读取启动时检测到的更新信息
   const pendingRaw = localStorage.getItem('pending_update')
@@ -234,11 +233,7 @@ onUnmounted(() => {
             <span>{{ t('whatsNew') }} {{ versionInfo ? 'v' + versionInfo : '' }}</span>
             <span class="confirm-btn" :title="t('confirmUpdate')" @click="confirmDownload">✅</span>
           </div>
-          <MarkdownRenderer
-            v-if="releaseNotes"
-            :content="releaseNotes"
-            class="release-notes-content"
-          />
+          <MarkdownRenderer v-if="releaseNotes" :content="releaseNotes" class="release-notes-content" />
           <div v-else class="release-notes-content">
             <p class="no-notes">{{ t('newVersionFoundGeneric') }}</p>
           </div>

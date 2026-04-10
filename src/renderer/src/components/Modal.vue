@@ -164,9 +164,7 @@ defineExpose({ open })
                   @keyup.enter="handleConfirm"
                 />
                 <label>{{ t('targetPrice') }}</label>
-                <button class="clear-icon-btn" :title="t('clearAlert')" @click="handleClear">
-                  🗑️
-                </button>
+                <button class="clear-icon-btn" :title="t('clearAlert')" @click="handleClear">🗑️</button>
               </div>
               <div class="alert-direction-group">
                 <button
@@ -230,10 +228,7 @@ defineExpose({ open })
                 <label>{{ modalType === 'add' ? t('initialCost') : t('tradePrice') }}</label>
               </div>
               <!-- 添加模式或有持仓时显示手数输入（清仓不需要） -->
-              <div
-                v-if="modalType === 'add' || tradeDirection !== 'clear'"
-                class="modal-input-group"
-              >
+              <div v-if="modalType === 'add' || tradeDirection !== 'clear'" class="modal-input-group">
                 <input
                   ref="qtyInput"
                   v-model.number="amount"
@@ -271,7 +266,8 @@ defineExpose({ open })
               </template>
               <template v-else-if="modalType === 'transaction'">
                 {{ modalMessage }}--{{ t('currentLots') }}
-                <span class="current-amount">{{ currentAmount }}</span> {{ t('lotsUnit') }}
+                <span class="current-amount">{{ currentAmount }}</span>
+                {{ t('lotsUnit') }}
               </template>
               <template v-else>{{ modalMessage }}</template>
             </p>

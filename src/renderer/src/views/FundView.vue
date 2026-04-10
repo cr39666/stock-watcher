@@ -221,14 +221,7 @@ const addFund = async () => {
 // 编辑已有基金持仓
 const editFund = (fund: FundItem) => {
   const quote = quotes.value[fund.code]
-  openEditModal(
-    fund.code,
-    quote?.name || fund.code,
-    fund.cost,
-    fund.shares,
-    fund.buyDate || '',
-    false
-  )
+  openEditModal(fund.code, quote?.name || fund.code, fund.cost, fund.shares, fund.buyDate || '', false)
 }
 
 // 删除/清空

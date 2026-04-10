@@ -46,8 +46,7 @@ function markdownToHtml(md: string): string {
       if (line.startsWith('### ')) return `<h4>${inlineFormat(line.slice(4))}</h4>`
       if (line.startsWith('## ')) return `<h3>${inlineFormat(line.slice(3))}</h3>`
       if (line.startsWith('# ')) return `<h2>${inlineFormat(line.slice(2))}</h2>`
-      if (line.startsWith('- ') || line.startsWith('* '))
-        return `<li>${inlineFormat(line.slice(2))}</li>`
+      if (line.startsWith('- ') || line.startsWith('* ')) return `<li>${inlineFormat(line.slice(2))}</li>`
       if (!line.trim()) return ''
       return `<p>${inlineFormat(line)}</p>`
     })

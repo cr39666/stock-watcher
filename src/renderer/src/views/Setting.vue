@@ -265,37 +265,25 @@ onUnmounted(() => {
             >{{ t('default') }}</span
           >
           <span class="lang-divider">|</span>
-          <span
-            class="lang-option"
-            :class="{ active: locale === 'en' }"
-            @click="changeLanguage('en')"
-            >{{ t('english') }}</span
-          >
+          <span class="lang-option" :class="{ active: locale === 'en' }" @click="changeLanguage('en')">{{
+            t('english')
+          }}</span>
           <span class="lang-divider">|</span>
-          <span
-            class="lang-option"
-            :class="{ active: locale === 'zh' }"
-            @click="changeLanguage('zh')"
-            >{{ t('chinese') }}</span
-          >
+          <span class="lang-option" :class="{ active: locale === 'zh' }" @click="changeLanguage('zh')">{{
+            t('chinese')
+          }}</span>
         </div>
       </div>
       <div class="setting-item">
         <span class="label">{{ t('alwaysOnTop') }}</span>
         <div class="lang-select">
-          <span
-            class="lang-option"
-            :class="{ active: ballAlwaysOnTop }"
-            @click="toggleBallAlwaysOnTop"
-            >{{ t('topBall') }}</span
-          >
+          <span class="lang-option" :class="{ active: ballAlwaysOnTop }" @click="toggleBallAlwaysOnTop">{{
+            t('topBall')
+          }}</span>
           <span class="lang-divider">|</span>
-          <span
-            class="lang-option"
-            :class="{ active: windowAlwaysOnTop }"
-            @click="toggleWindowAlwaysOnTop"
-            >{{ t('topWindow') }}</span
-          >
+          <span class="lang-option" :class="{ active: windowAlwaysOnTop }" @click="toggleWindowAlwaysOnTop">{{
+            t('topWindow')
+          }}</span>
         </div>
       </div>
       <div class="setting-item">

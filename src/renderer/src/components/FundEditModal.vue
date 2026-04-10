@@ -80,9 +80,7 @@ defineExpose({ open })
       <div class="edit-modal">
         <div class="edit-header">
           <span class="edit-cancel" @click="handleCancel">❌</span>
-          <span class="edit-title">{{
-            editIsNew ? t('addFundPosition') : t('editFundPosition')
-          }}</span>
+          <span class="edit-title">{{ editIsNew ? t('addFundPosition') : t('editFundPosition') }}</span>
           <span class="edit-confirm" @click="handleConfirm">✅</span>
         </div>
         <div class="edit-body">

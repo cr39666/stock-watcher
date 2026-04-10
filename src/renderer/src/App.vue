@@ -11,7 +11,6 @@ import { appVersion as version, isNewerVersion } from './composables/useUpdateCh
 
 const toastRef = ref<InstanceType<typeof Toast> | null>(null)
 
-
 const handleNavigate = (_event, path: string) => {
   router.push(path)
 }
@@ -42,9 +41,7 @@ const handleUpdateAvailable = (_event, info: any) => {
   }
   localStorage.setItem('pending_update', JSON.stringify(updateData))
 
-  const msg = newVersion
-    ? t('newVersionFound', { version: newVersion })
-    : t('newVersionFoundGeneric')
+  const msg = newVersion ? t('newVersionFound', { version: newVersion }) : t('newVersionFoundGeneric')
 
   toastRef.value?.show(msg, 'alert', 5000, () => {
     router.push('/about')

@@ -38,9 +38,7 @@ defineExpose({ open })
         <div class="confirm-header">
           <span class="confirm-btn-icon cancel" :title="t('cancel')" @click="handleCancel">❌</span>
           <span class="confirm-title">{{ confirmTitle }}</span>
-          <span class="confirm-btn-icon confirm" :title="t('confirm')" @click="handleConfirm"
-            >✅</span
-          >
+          <span class="confirm-btn-icon confirm" :title="t('confirm')" @click="handleConfirm">✅</span>
         </div>
         <div class="confirm-body">
           <p class="confirm-msg">{{ confirmMessage }}</p>

@@ -90,9 +90,7 @@ const icon = computed(() => {
 })
 
 const typeClass = computed(() => `toast-${toastType.value}`)
-const queueInfo = computed(() =>
-  alertQueue.value.length > 0 ? `(${alertQueue.value.length + 1})` : ''
-)
+const queueInfo = computed(() => (alertQueue.value.length > 0 ? `(${alertQueue.value.length + 1})` : ''))
 </script>
 
 <template>
