@@ -22,6 +22,7 @@ export default {
   chinese: '中文',
   default: 'Default',
   appVersion: 'Version',
+  autoLaunch: 'Auto Start',
 
   // About.vue
   investment: 'A-shares & Gold & Funds',

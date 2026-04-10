@@ -335,6 +335,18 @@ app.whenReady().then(() => {
     createTray()
   })
 
+  ipcMain.on('set-auto-launch', (_event, enabled: boolean) => {
+    app.setLoginItemSettings({
+      openAtLogin: enabled,
+      path: process.platform === 'win32' ? app.getPath('exe') : undefined
+    })
+  })
+
+  ipcMain.handle('get-auto-launch', () => {
+    const settings = app.getLoginItemSettings()
+    return settings.openAtLogin
+  })
+
   ipcMain.on('show-ball-context-menu', (event, currentMode: string = 'stock') => {
     const texts = ballMenuTexts[currentLang] || ballMenuTexts['default']
     const menu = Menu.buildFromTemplate([

@@ -22,6 +22,7 @@ export default {
   chinese: '中文',
   default: '默认',
   appVersion: '版本号',
+  autoLaunch: '开机自启',
 
   // About.vue
   investment: 'A股&黄金&基金',

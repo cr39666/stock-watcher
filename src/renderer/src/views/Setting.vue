@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import DragHandle from '../components/DragHandle.vue'
 import Toast from '../components/Toast.vue'
+import ToggleSwitch from '../components/ToggleSwitch.vue'
 import { getLastMainView } from '../router'
 
 const { t, locale } = useI18n()
@@ -18,6 +19,7 @@ let resizeObserver: ResizeObserver | null = null
 
 const ballAlwaysOnTop = ref(true)
 const windowAlwaysOnTop = ref(false)
+const autoLaunch = ref(false)
 
 // 更新状态
 const hasPendingUpdate = ref(false)
@@ -179,6 +181,12 @@ const changeLanguage = (lang: string) => {
   window.electron.ipcRenderer.send('set-language', lang)
 }
 
+const toggleAutoLaunch = async () => {
+  autoLaunch.value = !autoLaunch.value
+  window.electron.ipcRenderer.send('set-auto-launch', autoLaunch.value)
+  localStorage.setItem('auto_launch', JSON.stringify(autoLaunch.value))
+}
+
 onMounted(async () => {
   // 加载配置
   const ballSaved = localStorage.getItem('ball_always_on_top')
@@ -216,6 +224,18 @@ onMounted(async () => {
   const hotkeySaved = localStorage.getItem('global_hotkey')
   if (hotkeySaved !== null) {
     globalHotkey.value = hotkeySaved
+  }
+
+  // 初始化自启动状态：优先从系统读取实际状态
+  try {
+    const sysAutoLaunch = await window.electron.ipcRenderer.invoke('get-auto-launch')
+    autoLaunch.value = sysAutoLaunch
+    localStorage.setItem('auto_launch', JSON.stringify(sysAutoLaunch))
+  } catch {
+    const saved = localStorage.getItem('auto_launch')
+    if (saved !== null) {
+      autoLaunch.value = JSON.parse(saved)
+    }
   }
 
   // 检测更新状态 (用于设置页下方的绿点提示)
@@ -353,6 +373,10 @@ onUnmounted(() => {
             >{{ t('moduleFund') }}</span
           >
         </div>
+      </div>
+      <div class="setting-item">
+        <span class="label">{{ t('autoLaunch') }}</span>
+        <ToggleSwitch :active="autoLaunch" @toggle="toggleAutoLaunch" />
       </div>
       <div class="setting-item hotkey-item">
         <span class="label">{{ t('hotkeyLabel') }}</span>
