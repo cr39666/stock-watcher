@@ -148,6 +148,7 @@ export default {
   viewGoldHolding: 'View Gold Holding',
   collapseGoldHolding: 'Collapse Gold Holding',
   clickToTogglePnL: 'Click to toggle PnL display',
+  toggleCurrency: 'Toggle Currency',
 
   // FundView.vue
 

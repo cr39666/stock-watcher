@@ -148,6 +148,7 @@ export default {
   viewGoldHolding: '查看黄金持仓',
   collapseGoldHolding: '收起黄金持仓',
   clickToTogglePnL: '点击切换盈亏显示',
+  toggleCurrency: '切换货币',
 
   // FundView.vue
   noFunds: 'No Funds',
