@@ -428,6 +428,7 @@ const adjustStockFlow = async (stock: StockItem) => {
 
     const delta = res.amount
     const tradePrice = res.price
+    const isTodayTrade = res.isTodayTrade !== false // 默认 true
     if (delta === 0) return
 
     const newAmount = stock.amount + delta
@@ -451,8 +452,8 @@ const adjustStockFlow = async (stock: StockItem) => {
       const addTotalVal = delta * tradePrice
       stock.cost = Number(((oldTotalVal + addTotalVal) / newAmount).toFixed(3))
 
-      // 当日盈亏修正：加仓部分的当日盈亏应从买入价算起，而非昨收
-      if (yesterdayClose > 0) {
+      // 当日盈亏修正：仅当日操作时才修正
+      if (isTodayTrade && yesterdayClose > 0) {
         stock.dailyRealizedPnl = (stock.dailyRealizedPnl || 0) - (tradePrice - yesterdayClose) * delta * 100
       }
     } else {
@@ -461,8 +462,8 @@ const adjustStockFlow = async (stock: StockItem) => {
       const realized = (tradePrice - stock.cost) * soldLots * 100
       stock.realizedPnl = (stock.realizedPnl || 0) + realized
 
-      // 当日盈亏修正
-      if (yesterdayClose > 0) {
+      // 当日盈亏修正：仅当日操作时才修正
+      if (isTodayTrade && yesterdayClose > 0) {
         stock.dailyRealizedPnl =
           (stock.dailyRealizedPnl || 0) + (tradePrice - yesterdayClose) * soldLots * 100
       }

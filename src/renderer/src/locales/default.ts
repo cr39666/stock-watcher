@@ -103,6 +103,7 @@ export default {
   clearPositionTitle: '清仓确认',
   clearPositionConfirm: '以 {price} 卖出 {name} 的全部持仓 {amount} 手？',
   isTodayNewPosition: '是当日新建仓',
+  isTodayTrade: '是当日操作',
 
   // Confirm.vue
   confirm: '确定',

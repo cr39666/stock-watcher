@@ -13,6 +13,7 @@ const currentAmount = ref(0) // 当前持仓手数（调仓模式下使用）
 const alertDirection = ref<'up' | 'down'>('up')
 const tradeDirection = ref<'buy' | 'sell' | 'clear'>('buy')
 const isTodayNewPosition = ref(false) // 是否当日新建仓
+const isTodayTrade = ref(true) // 调仓模式：是否当日操作
 const shakeHint = ref('') // 临时提示
 let shakeTimer: ReturnType<typeof setTimeout> | null = null
 let resolvePromise: ((value: any) => void) | null = null
@@ -61,6 +62,7 @@ const open = (
   isPriceUp.value = defaults.isUp ?? null
   tradeDirection.value = 'buy' // 默认买入
   isTodayNewPosition.value = false // 默认不是当日新建仓
+  isTodayTrade.value = true // 默认当日操作
   isVisible.value = true
 
   nextTick(() => {
@@ -104,7 +106,8 @@ const handleConfirm = () => {
       confirmed: true,
       clearPosition: true,
       price: tradePrice.value,
-      amount: -currentAmount.value
+      amount: -currentAmount.value,
+      isTodayTrade: isTodayTrade.value
     })
     return
   }
@@ -120,7 +123,8 @@ const handleConfirm = () => {
     price: tradePrice.value,
     amount: finalAmount,
     direction: alertDirection.value,
-    isTodayNewPosition: isTodayNewPosition.value
+    isTodayNewPosition: isTodayNewPosition.value,
+    isTodayTrade: isTodayTrade.value
   })
 }
 
@@ -245,6 +249,14 @@ defineExpose({ open })
                   <input v-model="isTodayNewPosition" type="checkbox" class="checkbox-input" />
                   <span class="checkbox-custom"></span>
                   <span class="checkbox-text">{{ t('isTodayNewPosition') }}</span>
+                </label>
+              </div>
+              <!-- 调仓模式：是否当日操作 -->
+              <div v-if="modalType === 'transaction'" class="modal-checkbox-group">
+                <label class="checkbox-label">
+                  <input v-model="isTodayTrade" type="checkbox" class="checkbox-input" />
+                  <span class="checkbox-custom"></span>
+                  <span class="checkbox-text">{{ t('isTodayTrade') }}</span>
                 </label>
               </div>
             </template>

@@ -103,6 +103,7 @@ export default {
   clearPositionTitle: 'Sell All Confirmation',
   clearPositionConfirm: 'Sell all {amount} lot(s) of {name} at {price}?',
   isTodayNewPosition: "Today's New Position",
+  isTodayTrade: "Today's Trade",
 
   // Confirm.vue
   confirm: 'Confirm',
