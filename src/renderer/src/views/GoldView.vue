@@ -483,7 +483,13 @@ onUnmounted(() => {
       </div>
 
       <div class="footer-right">
-        <span v-if="fetchError" class="fetch-error-text" :title="t('fetchError')">⚠</span>
+        <span
+          v-if="fetchError"
+          class="fetch-error-text"
+          :title="t('fetchError')"
+          @click="toastRef?.show(t('fetchError'), 'warn')"
+          >⚠</span
+        >
         <span class="lock-icon" :title="t('toggleHide')" @click="toggleCensor">{{
           isCensored ? '🔒' : '🔓'
         }}</span>
@@ -878,8 +884,18 @@ onUnmounted(() => {
 .fetch-error-text {
   cursor: pointer;
   color: #e67e22;
-  opacity: 0.8;
   white-space: nowrap;
+  animation: breathe 2s ease-in-out infinite;
+}
+
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
 }
 
 .footer-right {
