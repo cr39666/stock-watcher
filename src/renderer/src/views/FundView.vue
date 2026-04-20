@@ -459,31 +459,31 @@ onUnmounted(() => {
         <thead>
           <tr>
             <th :title="t('name')" class="clickable-th" @click="toggleSort('name')">
-              Name
+              {{ t('thFundName') }}
               <span class="sort-icon">{{
                 sortColumn === 'name' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
               }}</span>
             </th>
             <th :title="t('fundNav')" class="clickable-th" @click="toggleSort('nav')">
-              NAV
+              {{ t('thNav') }}
               <span class="sort-icon">{{
                 sortColumn === 'nav' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
               }}</span>
             </th>
             <th :title="t('totalPnl')" class="clickable-th" @click="toggleSort('pnl')">
-              PnL
+              {{ t('thPnl') }}
               <span class="sort-icon">{{
                 sortColumn === 'pnl' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
               }}</span>
             </th>
             <th :title="t('change')" class="clickable-th" @click="toggleSort('chg')">
-              Chg%
+              {{ t('thFundChg') }}
               <span class="sort-icon">{{
                 sortColumn === 'chg' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
               }}</span>
             </th>
             <th :title="t('yieldRate')" class="clickable-th" @click="toggleSort('yield')">
-              Yield
+              {{ t('thYield') }}
               <span class="sort-icon">{{
                 sortColumn === 'yield' ? (sortOrder === 'asc' ? '↑' : '↓') : ''
               }}</span>
@@ -493,7 +493,7 @@ onUnmounted(() => {
               class="clickable-th"
               @click="toggleLastColMode"
             >
-              {{ lastColMode === 0 ? 'Days' : 'Val' }} <span class="toggle-icon">🔁</span>
+              {{ lastColMode === 0 ? t('thDays') : t('thFundVal') }} <span class="toggle-icon">🔁</span>
             </th>
           </tr>
         </thead>
@@ -609,7 +609,7 @@ onUnmounted(() => {
           :title="t('totalPnl')"
           @click.stop="copyTotalPnl"
         >
-          <span class="pnl-label">T.PnL:</span>
+          <span class="pnl-label">{{ t('labelTPnl') }}</span>
           <span v-if="!isCensored">{{ totalPnl > 0 ? '+' : '' }}{{ totalPnl.toFixed(1) }}</span>
           <span v-else>❇❇</span>
         </span>
