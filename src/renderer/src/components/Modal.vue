@@ -246,7 +246,12 @@ defineExpose({ open })
               <!-- 当日新建仓选项 -->
               <div v-if="modalType === 'add'" class="modal-checkbox-group">
                 <label class="checkbox-label">
-                  <input v-model="isTodayNewPosition" type="checkbox" class="checkbox-input" />
+                  <input
+                    v-model="isTodayNewPosition"
+                    type="checkbox"
+                    class="checkbox-input"
+                    @keyup.enter="handleConfirm"
+                  />
                   <span class="checkbox-custom"></span>
                   <span class="checkbox-text">{{ t('isTodayNewPosition') }}</span>
                 </label>
@@ -254,7 +259,12 @@ defineExpose({ open })
               <!-- 调仓模式：是否当日操作 -->
               <div v-if="modalType === 'transaction'" class="modal-checkbox-group">
                 <label class="checkbox-label">
-                  <input v-model="isTodayTrade" type="checkbox" class="checkbox-input" />
+                  <input
+                    v-model="isTodayTrade"
+                    type="checkbox"
+                    class="checkbox-input"
+                    @keyup.enter="handleConfirm"
+                  />
                   <span class="checkbox-custom"></span>
                   <span class="checkbox-text">{{ t('isTodayTrade') }}</span>
                 </label>
@@ -619,10 +629,18 @@ defineExpose({ open })
   font-size: 11px;
   color: #aaa;
   user-select: none;
+  position: relative;
 }
 
 .checkbox-input {
-  display: none;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
 }
 
 .checkbox-custom {
@@ -634,6 +652,11 @@ defineExpose({ open })
   position: relative;
   transition: all 0.2s;
   background: transparent;
+}
+
+.checkbox-input:focus + .checkbox-custom {
+  border-color: #2ecc71;
+  box-shadow: 0 0 0 2px rgba(46, 204, 113, 0.3);
 }
 
 .checkbox-input:checked + .checkbox-custom {
