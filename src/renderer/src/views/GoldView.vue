@@ -129,16 +129,17 @@ const fetchPrices = async (displayCurrency: Currency = currency.value, commitCur
 
   if (fetchVersion !== displayFetchVersion.value) return
 
-  goldPriceCNY.value = goldCNY
+  // 只在成功获取到新值时才更新，失败时保留上一次的值
+  if (goldCNY !== null) goldPriceCNY.value = goldCNY
 
   if (!commitCurrency) {
-    goldPrice.value = gold
-    silverPrice.value = silver
+    if (gold !== null) goldPrice.value = gold
+    if (silver !== null) silverPrice.value = silver
   } else if (gold !== null || silver !== null) {
     currency.value = displayCurrency
     localStorage.setItem('gold_currency', displayCurrency)
-    goldPrice.value = gold
-    silverPrice.value = silver
+    if (gold !== null) goldPrice.value = gold
+    if (silver !== null) silverPrice.value = silver
   }
 
   fetchError.value = gold === null && silver === null && goldCNY === null

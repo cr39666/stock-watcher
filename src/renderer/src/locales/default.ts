@@ -141,7 +141,7 @@ export default {
   // GoldView.vue
   metalGold: 'XAU',
   metalSilver: 'XAG',
-  fetchError: '数据获取失败，稍后再看',
+  fetchError: '实时数据稍有延迟',
   grams: '按克数',
   enterGrams: '请输入克数',
   enterAmount: '请输入金额',

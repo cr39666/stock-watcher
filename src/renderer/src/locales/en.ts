@@ -143,7 +143,7 @@ export default {
   // GoldView.vue
   metalGold: 'Gold',
   metalSilver: 'Silver',
-  fetchError: 'Data unavailable, check back later',
+  fetchError: 'Data may be slightly delayed',
   grams: 'By Grams',
   enterGrams: 'Enter grams',
   enterAmount: 'Enter amount',
